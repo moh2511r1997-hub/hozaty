@@ -70,12 +70,16 @@
     ["قناة معهد تراث الأنبياء للدراسات الحوزوية", "https://www.youtube.com/@Turath-Alanbiaa", "كل القنوات والقوائم"],
     ["قواعد اللغة العربية (المرحلة التمهيدية)", "https://www.youtube.com/playlist?list=PLKxikzZNxA6GxfUbJqamu1814e8K2yD8T", "النحو والصرف"],
     ["عقائد الشيعة الإمامية (المرحلة التمهيدية)", "https://www.youtube.com/playlist?list=PLKxikzZNxA6GCIWhI_sT5dtfX0frzk8Lp", "العقائد"],
-    ["شرح عقائد الإمامية (المقدمات الأولى)، الشيخ ورد الحلبي", "https://www.youtube.com/playlist?list=PLKxikzZNxA6FBo9tPJfKZgYS518yX2qc2", "العقائد"]
+    ["شرح عقائد الإمامية (المقدمات الأولى)، الشيخ ورد الحلبي", "https://www.youtube.com/playlist?list=PLKxikzZNxA6FBo9tPJfKZgYS518yX2qc2", "العقائد"],
+    ["OpenStax: الفلك Astronomy 2e (إنجليزي، CC BY 4.0)", "https://openstax.org/details/books/astronomy-2e", "الفلك، كتاب جامعي مفتوح"],
+    ["OpenStax: University Physics, المجلد 1 (إنجليزي، CC BY 4.0)", "https://openstax.org/details/books/university-physics-volume-1", "الميكانيكا والموجات والحرارة"],
+    ["OpenStax: University Physics, المجلد 2 (إنجليزي، CC BY 4.0)", "https://openstax.org/details/books/university-physics-volume-2", "الكهرباء والمغناطيسية والبصريات"],
+    ["OpenStax: University Physics, المجلد 3 (إنجليزي، CC BY 4.0)", "https://openstax.org/details/books/university-physics-volume-3", "الفيزياء الحديثة والكم"]
   ];
   PAGES.sources = function () {
     return head("المصادر والصوتيات", "قوائم دروس صوتية ومرئية تحقّقتُ من وجودها بفتحها. تُفتح خارج التطبيق.") +
       '<div class="card"><div class="list">' + SOURCES.map(function (s) {
         return '<div class="item"><div class="grow"><b>' + s[0] + '</b><div class="small muted">' + s[2] + '</div></div><a class="btn" target="_blank" rel="noopener" href="' + s[1] + '">افتح</a></div>';
       }).join("") + '</div></div>' +
-      '<p class="small muted" style="margin-top:10px">لا توجد بعد مصادر صوتية موثّقة للفيزياء والفلك، فهي تُدرَّس بالشرح العام للأستاذ الذكي. هذا الترتيب من مؤسسة واحدة وليس منهجًا رسميًا للنجف.</p>';
+      '<p class="small muted" style="margin-top:10px">دروس الفيزياء والفلك مبنية على مقالات ويكيبيديا العربية (مختصرة، ترخيص CC BY-SA 4.0) وتُنسب في كل درس لمقالتها. لا توجد بعد مصادر صوتية موثّقة لهما، وكتب OpenStax مراجع للقراءة وليست مدمجة. هذا الترتيب من مؤسسة واحدة وليس منهجًا رسميًا للنجف.</p>';
   };

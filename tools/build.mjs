@@ -40,6 +40,23 @@ rep("Object.assign(ACTS, ACTS2);", "Object.assign(ACTS, ACTS2); Object.assign(AC
 rep("  /* ---------- router + events ---------- */", extra + "\n  /* ---------- router + events ---------- */");
 rep('    ["الحساب", [', '    ["الموقع والمصادر", [["qibla", "القبلة والأوقات", "cal"], ["sources", "المصادر والصوتيات", "book"]]],\n    ["الحساب", [');
 
+
+// physics/astronomy topic texts (Arabic Wikipedia extracts, CC BY-SA 4.0) -> unitText() for topic units
+const topics = fs.readFileSync(path.join(root, "data", "topics.json"), "utf8").replace(/</g, "\u003c");
+{
+  const bi = h.indexOf('id="booktext"'), be = h.indexOf("</script>", bi) + "</script>".length;
+  h = h.slice(0, be) + '\n<script type="application/json" id="topictext">' + topics + "</script>" + h.slice(be);
+}
+rep('  try { BT = JSON.parse(document.getElementById("booktext").textContent); } catch (e) { BT = {}; }',
+  '  try { BT = JSON.parse(document.getElementById("booktext").textContent); } catch (e) { BT = {}; }\n  var TT = {}; try { TT = JSON.parse(document.getElementById("topictext").textContent); } catch (e) { TT = {}; }');
+rep('var p = uid.split(":"); if (p.length !== 3 || p[1] !== "1") return null;', 'var p = uid.split(":"); if (p.length === 2 && TT[uid]) return TT[uid].text; if (p.length !== 3 || p[1] !== "1") return null;');
+rep('  function bookTitleOf(sid) {', '  function srcNames(uid) { return TT[uid].sources.map(function (s) { return s.title; }).join("، "); }\n' +
+  '  function srcTitleOf(sid, uid) { return TT[uid] ? "ويكيبيديا العربية: " + srcNames(uid) : bookTitleOf(sid); }\n' +
+  '  function srcLabel(sid, uid, u) { return TT[uid] ? esc("ويكيبيديا العربية: " + srcNames(uid)) + " — " + u.title + " (CC BY-SA 4.0، نص مختصر)" : esc(bookTitleOf(sid)) + " — " + u.title + " (تقسيم آلي، رقم الصفحة غير متوفر)"; }\n' +
+  '  function bookTitleOf(sid) {');
+rep('(text ? " من «" + bookTitleOf(sid) + "»." : ".")', '(text ? " من «" + srcTitleOf(sid, uid) + "»." : ".")');
+rep("esc(bookTitleOf(sid)) + ' — ' + u.title + ' (تقسيم آلي، رقم الصفحة غير متوفر)", "srcLabel(sid, uid, u) + '");
+
 // inject shim before the main app script (the first plain <script> after the booktext JSON)
 const marker = "</script>\n<script>";
 const i = h.indexOf(marker, h.indexOf('id="booktext"'));
