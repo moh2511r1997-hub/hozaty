@@ -21,6 +21,12 @@ jobs:
       - run: npx cap add android
       - name: App icons from the official logo (assets/icon-only.png)
         run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#0A4C98' --iconBackgroundColorDark '#0A4C98' --splashBackgroundColor '#FFFFFF' --splashBackgroundColorDark '#FFFFFF'
+      - name: Install launcher icons from the official logo
+        run: |
+          R=android/app/src/main/res
+          rm -f $R/drawable/ic_launcher_background.xml $R/drawable-v24/ic_launcher_foreground.xml $R/drawable/ic_launcher_foreground.xml
+          cp -r assets/android/res/. $R/
+          ls $R/mipmap-anydpi-v26 $R/mipmap-xxxhdpi
       - name: Notification permissions
         run: |
           M=android/app/src/main/AndroidManifest.xml
