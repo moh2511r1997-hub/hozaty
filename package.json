@@ -1,10 +1,10 @@
 {
   "name": "hozaty",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "حوزتي: أستاذ حوزوي ذكي مستقل (أندرويد)",
+  "description": "حوزتي: دروس المقدمات الحوزوية والفيزياء والفلك، كل درس مربوط بشرحه على يوتيوب",
   "scripts": {
-    "build": "node tools/build.mjs",
+    "data": "node tools/make-data.mjs",
     "serve": "node tools/serve.mjs"
   },
   "dependencies": {

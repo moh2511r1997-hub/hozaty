@@ -2,6 +2,7 @@ name: Build Android APK
 on:
   push:
     branches: [main]
+    paths-ignore: ["books/**"]
   workflow_dispatch:
 
 jobs:
@@ -17,20 +18,19 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm install
-      - run: npm run build
       - run: npx cap add android
-      - name: Generate app icons from assets/icon-only.png
+      - name: App icons from the official logo (assets/icon-only.png)
         run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#FFFFFF' --iconBackgroundColorDark '#FFFFFF'
-      - name: Allow notifications permissions
+      - name: Notification permissions
         run: |
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <application#' $M
-          grep -n "uses-permission" $M
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk hozaty.apk
       - uses: actions/upload-artifact@v4
         with:
           name: hozaty-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: hozaty.apk

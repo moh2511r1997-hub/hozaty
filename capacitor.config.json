@@ -1,6 +1,6 @@
 {
   "appId": "app.hozaty.tutor",
   "appName": "حوزتي",
-  "webDir": "www",
+  "webDir": "web",
   "android": { "allowMixedContent": false }
 }
