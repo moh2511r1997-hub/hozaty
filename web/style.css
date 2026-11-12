@@ -1,3 +1,4 @@
+@font-face{font-family:"KFGQPC Uthmanic Hafs";src:url("fonts/UthmanicHafs.woff2") format("woff2");font-display:block}
 :root{--title:"Cairo","Segoe UI",Tahoma,sans-serif;--ui:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--read:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--ok:#1B7F4B;--shadow:0 1px 2px rgba(16,45,85,.06),0 4px 14px rgba(16,45,85,.07);
   --bg:#F5F8FC;--surface:#fff;--ink:#102D55;--soft:#64748B;--line:#D8E2EE;--navy:#102D55;--turq:#08B8C5;--turq-ink:#067A84;--on-navy:#fff;color-scheme:light}
 /* day themes (light mode) */
@@ -69,7 +70,7 @@ header.top .name{font-weight:800;font-size:24px;flex:1}
 .item:last-child{border-bottom:0}
 .item .grow{flex:1;min-width:0}
 .item .pdf{width:44px;height:52px;border-radius:8px;background:#B23A34;color:#fff;font:700 12px var(--ui);display:grid;place-items:center;flex:none}
-nav.bottom{position:fixed;inset-inline:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.bottom{position:fixed;inset-inline:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
 nav.bottom a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;min-height:54px;font-size:12px;color:var(--soft);text-decoration:none;border-radius:10px}
 nav.bottom a svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.bottom a[aria-current="page"]{color:var(--turq-ink);font-weight:700}
@@ -103,7 +104,7 @@ nav.bottom a[aria-current="page"]{color:var(--turq-ink);font-weight:700}
 input[type="text"]{flex:1;min-width:0;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:18px var(--ui)}
 .btn:disabled{opacity:.5;cursor:default}
 #splash{background:var(--bg);color:var(--ink);text-align:center;padding:24px}
-#splash .bsm{font:400 clamp(34px,9vw,64px)/1.8 "Amiri Quran","Scheherazade New",serif;color:var(--turq-ink);animation:fadein 1s ease both}
+#splash .bsm{font:400 clamp(38px,10vw,72px)/2 "KFGQPC Uthmanic Hafs","UthmanicHafs","Amiri Quran",serif;color:var(--turq-ink);animation:fadein 1s ease both}
 #splash .bsm small{display:block;font-size:.42em;color:var(--soft);margin-top:8px;font-family:var(--title)}
 @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 #welcome{position:fixed;inset:0;z-index:90;background:var(--bg);display:none;place-items:center;padding:20px}
@@ -112,3 +113,16 @@ input[type="text"]{flex:1;min-width:0;min-height:46px;padding:0 14px;border:1px 
 .wbox .wlogo{width:min(260px,70%);height:auto;margin:0 auto 6px;background:#fff;border-radius:20px;padding:8px}
 .wbox h1{font-size:28px}
 @media (prefers-reduced-motion:reduce){#splash .bsm{animation:none}}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.cp{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:99px;font-family:var(--title);font-weight:600;font-size:14px}
+.cp[aria-pressed="true"]{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.chatbox{margin-block:12px;display:flex;flex-direction:column;gap:10px;min-height:260px;max-height:52vh;overflow-y:auto;padding:4px}
+.msg{max-width:94%;padding:10px 14px;border-radius:16px;line-height:1.9}
+.msg.bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
+.msg.me{align-self:flex-end;background:var(--navy);color:var(--on-navy)}
+.quote{margin-top:8px;border-inline-start:4px solid var(--turq);background:var(--bg);border-radius:8px;padding:8px 12px}
+.quote .qt{font-size:17px}.quote .qsrc{font-family:var(--title);font-size:12px;color:var(--soft);margin-top:4px}
+mark{background:color-mix(in srgb,var(--turq) 30%,transparent);color:inherit;border-radius:4px;padding:0 2px}
+.chatform{display:flex;gap:8px}
+.small{font-size:14px}

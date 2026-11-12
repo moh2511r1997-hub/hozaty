@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { SPEC } from "./books-spec.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const pairs = (s) => s.split(",").map((x) => { const i = x.indexOf(":"); return { n: +x.slice(0, i), id: x.slice(i + 1) }; });
@@ -134,6 +135,21 @@ const data = {
     ] }
   ]
 };
+// ---- external books from archive.org (verified via metadata) ----
+const META = fs.existsSync(path.join(root, "data", "archive-meta.json")) ? JSON.parse(fs.readFileSync(path.join(root, "data", "archive-meta.json"), "utf8")) : {};
+const ARCH = (id, file) => "https://archive.org/download/" + id + "/" + encodeURIComponent(file);
+let extBooks = 0;
+for (const [sid, list] of Object.entries(SPEC)) {
+  const sub = data.subjects.find((x) => x.id === sid); if (!sub) continue;
+  for (const e of list) {
+    const m = META[e.id]; if (!m) continue;
+    for (const p of m.pdfs) { sub.books.push({ title: e.title + (m.pdfs.length > 1 ? " — " + p.name.replace(/\.pdf$/i, "") : ""), url: p.mb > 80 ? "https://archive.org/details/" + e.id : ARCH(e.id, p.name), mb: p.mb }); extBooks++; }
+  }
+}
+// course -> book on archive.org (details page)
+const QMAP = { "ألفية ابن مالك": "alfiya_201812", "مغني اللبيب": "moharram1965_gmail_20180428", "منهاج الصالحين": "mnhjasasalheen-2_202006", "شرائع الإسلام": "01_20220505_202205", "اللمعة الدمشقية": "AAlexandrina-190221", "المكاسب الشيخ الأنصاري": "almkaseb-murtada-alansari_20200628", "أصول الفقه المظفر": "Osulalfeqh", "دروس في علم الأصول الحلقة الأولى": "droosfielmalosul_3", "دروس في علم الأصول الحلقة الثانية": "droosfielmalosul_3", "دروس في علم الأصول الحلقة الثالثة": "droosfielmalosul_3", "فرائد الأصول الرسائل": "abd-albaqir-360", "كفاية الأصول": "20200829_20200829_2116", "بداية الحكمة": "20230721_20230721_0707", "نهاية الحكمة": "moamenquraish_gmail_11", "البداية في علم الدراية": "almoamltv_gmail_20140330_1148", "تفسير الميزان": "almizan_alami_22j" };
+let linked = 0;
+for (const sub of data.subjects) for (const c of sub.courses) if (c.q && QMAP[c.q] && !c.book) { c.bookUrl = "https://archive.org/details/" + QMAP[c.q]; delete c.q; linked++; }
 data.missing = [...new Set(data.subjects.flatMap((s) => s.courses.map((c) => c.q).filter(Boolean)))];
 fs.mkdirSync(path.join(root, "web"), { recursive: true });
 fs.writeFileSync(path.join(root, "web", "data.json"), JSON.stringify(data));
@@ -142,4 +158,5 @@ const plays = data.subjects.reduce((a, s) => a + s.courses.filter((c) => c.playl
 const ids = data.subjects.flatMap((s) => s.courses.flatMap((c) => c.lessons.map((l) => l.id)));
 const pids = data.subjects.flatMap((s) => s.courses.filter((c) => c.playlist).map((c) => c.playlist));
 const bad = ids.filter((x) => !/^[A-Za-z0-9_-]{11}$/.test(x)), badP = pids.filter((x) => !/^PL[A-Za-z0-9_-]{16,40}$/.test(x));
+console.log("external books:", extBooks, "courses linked to archive:", linked);
 console.log("playlist courses:", plays, "video lessons:", total, "bad video ids:", bad.length ? bad.join(",") : "none", "bad playlist ids:", badP.length ? badP.join(",") : "none", "dupes:", ids.length - new Set(ids).size, "dupe playlists:", pids.length - new Set(pids).size);
