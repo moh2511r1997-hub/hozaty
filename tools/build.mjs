@@ -28,6 +28,12 @@ rep("افتح حوزتي من رابطها داخل حسابك في Claude لت�
 rep(" (أول مرة سيطلب Claude إذنك)", "");
 rep('app: "hozati"', 'app: "hozaty"');
 
+// replace the embedded logo with the official one (brand/logo-256.png)
+const logo = "data:image/png;base64," + fs.readFileSync(path.join(root, "brand", "logo-256.png")).toString("base64");
+const li = h.indexOf('var LOGO = "'), le = h.indexOf('";', li);
+if (li < 0 || le < 0) throw new Error("LOGO not found");
+h = h.slice(0, li) + 'var LOGO = "' + logo + h.slice(le);
+
 // inject shim before the main app script (the first plain <script> after the booktext JSON)
 const marker = "</script>\n<script>";
 const i = h.indexOf(marker, h.indexOf('id="booktext"'));
