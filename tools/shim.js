@@ -96,7 +96,7 @@
   /* ---- floating settings button ---- */
   window.addEventListener("DOMContentLoaded", function () {
     var b = document.createElement("button"); b.textContent = "⚙"; b.setAttribute("aria-label", "إعداد الأستاذ الذكي");
-    b.style.cssText = "position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:8px;z-index:60;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px";
+    b.style.cssText = "position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));left:10px;opacity:.92;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:60;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px";
     b.onclick = function () { window.hzSettings(); }; document.body.appendChild(b);
   });
 

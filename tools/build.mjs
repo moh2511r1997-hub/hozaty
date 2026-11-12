@@ -34,6 +34,12 @@ const li = h.indexOf('var LOGO = "'), le = h.indexOf('";', li);
 if (li < 0 || le < 0) throw new Error("LOGO not found");
 h = h.slice(0, li) + 'var LOGO = "' + logo + h.slice(le);
 
+// extra pages (qibla/prayer times, sources) + nav entries
+const extra = fs.readFileSync(path.join(root, "tools", "extra-pages.js"), "utf8");
+rep("Object.assign(ACTS, ACTS2);", "Object.assign(ACTS, ACTS2); Object.assign(ACTS, EXTRA_ACTS);");
+rep("  /* ---------- router + events ---------- */", extra + "\n  /* ---------- router + events ---------- */");
+rep('    ["الحساب", [', '    ["الموقع والمصادر", [["qibla", "القبلة والأوقات", "cal"], ["sources", "المصادر والصوتيات", "book"]]],\n    ["الحساب", [');
+
 // inject shim before the main app script (the first plain <script> after the booktext JSON)
 const marker = "</script>\n<script>";
 const i = h.indexOf(marker, h.indexOf('id="booktext"'));
