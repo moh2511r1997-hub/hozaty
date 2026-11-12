@@ -19,7 +19,7 @@ h1,h2,h3{margin:0;line-height:1.4;text-wrap:balance}
 h1,h2,h3,.name,.tile b,.btn,nav.bottom a,.chip,.les .num,.sec small,.day,.slot .t{font-family:var(--title)}
 h1{font-weight:800;font-size:26px} h2{font-size:19px;font-weight:700} h3{font-size:16px;font-weight:700}
 p{margin:0 0 10px}
-.wrap{max-width:980px;margin-inline:auto;padding-bottom:96px}
+.wrap{max-width:980px;margin-inline:auto;padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
 header.top{display:flex;align-items:center;gap:12px;padding-block:12px}
 header.top img{width:48px;height:48px;border-radius:14px;background:#fff;box-shadow:var(--shadow)}
 header.top .name{font-weight:800;font-size:24px;flex:1}
@@ -126,3 +126,16 @@ input[type="text"]{flex:1;min-width:0;min-height:46px;padding:0 14px;border:1px 
 mark{background:color-mix(in srgb,var(--turq) 30%,transparent);color:inherit;border-radius:4px;padding:0 2px}
 .chatform{display:flex;gap:8px}
 .small{font-size:14px}
+
+.seg .segl{flex:1;text-align:center;padding:10px 8px;border-radius:10px;font-family:var(--title);font-weight:700;color:var(--soft);text-decoration:none}
+.seg .segl[aria-selected="true"]{background:var(--navy);color:var(--on-navy)}
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:10px;max-height:240px;overflow-y:auto}
+.fb{min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:var(--title);font-weight:600}
+.fb.on{background:var(--turq);color:#06233F;border-color:var(--turq)}
+.aucard{position:sticky;top:6px;z-index:5}
+.grid.g2f{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.chips.wrap2{flex-wrap:wrap;overflow:visible}
+label.field{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--soft)}
+input[type="time"],input[type="number"]{min-height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:18px var(--ui)}
+select{min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:16px var(--ui);padding:0 8px}
+.toast{bottom:calc(120px + env(safe-area-inset-bottom,0px))}

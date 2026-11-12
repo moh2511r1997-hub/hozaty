@@ -112,6 +112,7 @@
           return '<a class="les' + (d ? " done" : "") + '" href="#/l/' + s.id + "|" + c.id + "|" + l.id + '"><span class="num">' + (d ? '<img src="' + LOGO + '" alt="">' : l.n) + "</span><small>" + (d ? "تم" : "الدرس") + "</small></a>";
         }).join("") + "</div>";
     });
+    if (D.audio && D.audio.courses.some(function (c) { return c[0] === s.id; })) h += '<a class="btn accent" style="margin-block:10px" href="#/audio/' + s.id + '">🎧 صوتيات أساتذة الحوزة لهذه المادة</a>';
     if (s.books.length) h += '<div class="sec"><h2>كتب المادة</h2></div><div class="card"><div class="list">' + s.books.map(bookRow).join("") + "</div></div>";
     shell(h, "#/");
   }
@@ -140,7 +141,7 @@
   }
 
   function pageBooks() {
-    var h = '<div class="hero"><h1>الكتب</h1><p>كتب المنهج بصيغة PDF بحسب المادة.</p></div>';
+    var h = '<div class="hero"><h1>الكتب</h1><p>كتب المنهج بصيغة PDF بحسب المادة.</p></div>' + tabsBooksAudio("books");
     D.subjects.filter(function (s) { return s.books.length; }).forEach(function (s) {
       h += '<div class="sec"><h2>' + esc(s.name) + '</h2><small>' + s.books.length + ' كتاب</small></div><div class="card"><div class="list">' + s.books.map(bookRow).join("") + "</div></div>";
     });
@@ -166,137 +167,81 @@
     document.getElementById("reset").onclick = function () { if (confirm("سيُمسح تقدّمك في كل الدروس. متأكد؟")) { setDone({}); ls("hz:last", null); toast("تم المسح."); pageAbout(); } };
   }
 
-  /* ---------- daily timetable: 8:00-11:00, Saturday to Wednesday (Thursday and Friday off) ---------- */
-  var SLOTS = [["8:00 – 8:35", "nahw"], ["8:40 – 9:10", "sarf"], ["9:15 – 9:50", "mantiq"], ["9:55 – 10:25", "balagha"], ["10:30 – 11:00", "aqaid"]];
-  var WEEK = [[6, "السبت"], [0, "الأحد"], [1, "الاثنين"], [2, "الثلاثاء"], [3, "الأربعاء"], [4, "الخميس"], [5, "الجمعة"]];
+  /* ---------- audio: howza.net lessons (streamed from the site) ---------- */
+  var AU = { sid: null, open: null, cur: null };
+  function audioUrl(c, i) { return "https://howza.net/Sounds/" + c[3].split("/").map(encodeURIComponent).join("/") + "/" + String(i).padStart(3, "0") + ".mp3"; }
+  function catUrl(p) { return "https://howza.net/archives/category/" + p.split("/").map(encodeURIComponent).join("/"); }
+  function subName(id) { var s = sub(id); return s ? s.name : id; }
+  function tabsBooksAudio(active) { return '<div class="seg" style="margin-bottom:12px"><a class="segl" href="#/books" aria-selected="' + (active === "books") + '">الكتب</a><a class="segl" href="#/audio" aria-selected="' + (active === "audio") + '">الصوتيات</a></div>'; }
+  function playLesson(ci, i) {
+    var c = D.audio.courses[ci], au = document.getElementById("au"); if (!au) return;
+    AU.cur = [ci, i]; au.src = audioUrl(c, i); au.playbackRate = parseFloat(ls("hz:rate") || "1"); au.play().catch(function () {});
+    document.getElementById("aut").textContent = c[2] + " — الملف " + i + " من " + c[4];
+    [].forEach.call(document.querySelectorAll(".fb"), function (b) { b.classList.toggle("on", b.getAttribute("data-c") == ci && b.getAttribute("data-i") == i); });
+  }
+  function pageAudio(sid) {
+    AU.sid = sid || null; var A = D.audio, list = A.courses.map(function (c, i) { return [c, i]; }).filter(function (x) { return !AU.sid || x[0][0] === AU.sid; });
+    var h = '<div class="hero"><h1>الصوتيات</h1><p>دروس صوتية لأساتذة الحوزة العلمية من «' + esc(A.credit) + '». تُبثّ من موقعهم وتحتاج إنترنتًا.</p></div>' + tabsBooksAudio("audio");
+    h += '<div class="card aucard"><div id="aut" class="muted">اختر درسًا للتشغيل</div><audio id="au" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="row" style="margin-top:8px"><button class="btn" id="aprev">→ السابق</button><button class="btn" id="anext">التالي ←</button><label class="row small" style="gap:6px">السرعة <select id="arate"><option>0.75</option><option>1</option><option>1.25</option><option>1.5</option><option>2</option></select></label></div></div>';
+    h += '<div class="chips" style="margin-top:12px"><button class="cp" data-s="" aria-pressed="' + (!AU.sid) + '">الكل</button>' + [].concat(["nahw", "sarf", "mantiq", "balagha", "aqaid", "fiqh0", "fiqh", "usul", "falsafa"]).filter(function (s) { return A.courses.some(function (c) { return c[0] === s; }); }).map(function (s) { return '<button class="cp" data-s="' + s + '" aria-pressed="' + (AU.sid === s) + '">' + esc(subName(s)) + "</button>"; }).join("") + "</div>";
+    h += list.map(function (x) {
+      var c = x[0], ci = x[1], isOpen = AU.open === ci, nums = "";
+      if (isOpen) { for (var i = 1; i <= c[4]; i++) nums += '<button class="fb" data-c="' + ci + '" data-i="' + i + '">' + i + "</button>"; }
+      return '<div class="card cc"><div class="row" style="justify-content:space-between"><h3>' + esc(c[2]) + '</h3><span class="chip">' + c[4] + ' ملفًا</span></div><p class="muted small" style="margin:4px 0 8px">' + esc(subName(c[0])) + '</p><div class="row"><button class="btn primary" data-open="' + ci + '">' + (isOpen ? "إخفاء الملفات" : "🎧 اختر الملف") + '</button><a class="btn" target="_blank" rel="noopener" href="https://howza.net/archives/' + c[1] + '">صفحة الدورة</a></div>' + (isOpen ? '<div class="files">' + nums + "</div>" : "") + "</div>";
+    }).join("");
+    h += '<div class="sec"><h2>كل كتب الموقع</h2><small>' + A.cats.length + ' كتابًا</small></div><div class="card"><div class="list">' + A.cats.map(function (k) { return '<div class="item"><div class="grow"><b>' + esc(k[0]) + '</b><div class="muted small">' + k[1] + ' دورة</div></div><a class="btn" target="_blank" rel="noopener" href="' + catUrl(k[2]) + '">افتح</a></div>'; }).join("") + "</div></div>";
+    h += '<div class="note">الأصوات لأصحابها وللموقع، والتطبيق يفتحها منه مباشرة ولا يعدّلها. إن توقف ملف فتخطّاه التطبيق إلى التالي.</div>';
+    shell(h, "#/books");
+    var au = document.getElementById("au"), rate = document.getElementById("arate"); rate.value = ls("hz:rate") || "1";
+    rate.onchange = function () { ls("hz:rate", rate.value); au.playbackRate = parseFloat(rate.value); };
+    function step(d) { if (!AU.cur) return; var c = D.audio.courses[AU.cur[0]], n = AU.cur[1] + d; if (n >= 1 && n <= c[4]) playLesson(AU.cur[0], n); }
+    document.getElementById("aprev").onclick = function () { step(-1); }; document.getElementById("anext").onclick = function () { step(1); };
+    au.onended = function () { step(1); }; au.onerror = function () { if (AU.cur) { toast("تعذّر هذا الملف، ننتقل إلى التالي."); step(1); } };
+    [].forEach.call(document.querySelectorAll("[data-open]"), function (b) { b.onclick = function () { var v = parseInt(b.getAttribute("data-open"), 10); AU.open = AU.open === v ? null : v; pageAudio(AU.sid); }; });
+    [].forEach.call(document.querySelectorAll(".fb"), function (b) { b.onclick = function () { playLesson(parseInt(b.getAttribute("data-c"), 10), parseInt(b.getAttribute("data-i"), 10)); }; });
+    [].forEach.call(document.querySelectorAll(".cp[data-s]"), function (b) { b.onclick = function () { AU.open = null; pageAudio(b.getAttribute("data-s") || null); }; });
+  }
+
+  /* ---------- editable timetable ---------- */
+  var DEFPLAN = { start: "08:00", end: "11:00", gap: 5, days: [6, 0, 1, 2, 3], subs: ["nahw", "sarf", "mantiq", "balagha", "aqaid"] };
+  function getPlan() { var p = null; try { p = JSON.parse(ls("hz:plan") || "null"); } catch (e) {} if (!p || !p.start || !p.end) return JSON.parse(JSON.stringify(DEFPLAN)); p.gap = isFinite(p.gap) ? p.gap : 5; p.days = p.days || DEFPLAN.days; p.subs = (p.subs && p.subs.length) ? p.subs : DEFPLAN.subs; return p; }
+  function mins(t) { var m = /^(\d{1,2}):(\d\d)$/.exec(t); return m ? (+m[1]) * 60 + (+m[2]) : 0; }
+  function fmtT(m) { var h = Math.floor(m / 60) % 24, mm = m % 60; return h + ":" + (mm < 10 ? "0" : "") + mm; }
+  function slotsFor(p) {
+    var a = mins(p.start), b = mins(p.end), n = p.subs.length; if (b <= a || !n) return [];
+    var each = Math.floor(((b - a) - p.gap * (n - 1)) / n); if (each < 5) return [];
+    var t = a; return p.subs.map(function (sid) { var s = fmtT(t) + " – " + fmtT(t + each); t += each + p.gap; return [s, sid]; });
+  }
+  var DAYN = [[6, "السبت"], [0, "الأحد"], [1, "الاثنين"], [2, "الثلاثاء"], [3, "الأربعاء"], [4, "الخميس"], [5, "الجمعة"]];
+  var PLANSUBS = ["nahw", "sarf", "mantiq", "balagha", "aqaid", "fiqh0", "fiqh", "usul", "falsafa", "hadith"];
   function nextLesson(s, done) {
     for (var i = 0; i < s.courses.length; i++) { var c = s.courses[i]; for (var j = 0; j < c.lessons.length; j++) { if (!done[key(s.id, c.id, c.lessons[j].id)]) return { c: c, l: c.lessons[j] }; } }
     return null;
   }
   function pagePlan() {
-    var done = getDone(), today = new Date().getDay(), off = today === 4 || today === 5;
-    var h = '<div class="hero"><h1>الجدول اليومي</h1><p>من الثامنة صباحًا إلى الحادية عشرة، من السبت إلى الأربعاء. الخميس والجمعة عطلة.</p></div>';
-    h += '<div class="days">' + WEEK.map(function (d) { return '<span class="day' + (d[0] === today ? " now" : "") + (d[0] === 4 || d[0] === 5 ? " off" : "") + '">' + d[1] + "</span>"; }).join("") + "</div>";
-    if (off) h += '<div class="card"><h3>اليوم عطلة</h3><p style="margin:0">استرح، ويمكنك مراجعة ما مضى أو تصفّح السطوح وبحث الخارج من قسم الدروس.</p></div>';
-    else h += '<div class="card"><h3>درس اليوم</h3><div class="list">' + SLOTS.map(function (sl) {
-      var s = sub(sl[1]), n = nextLesson(s, done);
-      return '<div class="slot"><span class="t">' + sl[0] + '</span><div class="grow"><b>' + esc(s.name) + "</b>" + (n ? '<div class="muted" style="font-size:15px">' + esc(n.c.name) + " · " + esc(n.l.title) + "</div>" : '<div class="muted">أتممتَ كل دروسها</div>') + "</div>" +
-        (n ? '<a class="btn primary" href="#/l/' + s.id + "|" + n.c.id + "|" + n.l.id + '">ابدأ</a>' : "") + "</div>";
+    var p = getPlan(), done = getDone(), today = new Date().getDay(), off = p.days.indexOf(today) < 0, slots = slotsFor(p);
+    var h = '<div class="hero"><h1>الجدول اليومي</h1><p>من ' + esc(fmtT(mins(p.start))) + ' إلى ' + esc(fmtT(mins(p.end))) + '، وتقدر تعدّله ليلائم وقتك.</p></div>';
+    h += '<div class="days">' + DAYN.map(function (d) { return '<span class="day' + (d[0] === today ? " now" : "") + (p.days.indexOf(d[0]) < 0 ? " off" : "") + '">' + d[1] + "</span>"; }).join("") + "</div>";
+    if (off) h += '<div class="card"><h3>اليوم خارج جدولك</h3><p style="margin:0">استرح، أو تصفّح الدروس من قسم الدروس.</p></div>';
+    else if (!slots.length) h += '<div class="card"><h3>الوقت لا يكفي</h3><p style="margin:0">قلّل عدد المواد أو وسّع الوقت في «تعديل الأوقات» أدناه.</p></div>';
+    else h += '<div class="card"><h3>درس اليوم</h3><div class="list">' + slots.map(function (sl) {
+      var s = sub(sl[1]); if (!s) return "";
+      var n = nextLesson(s, done);
+      return '<div class="slot"><span class="t">' + sl[0] + '</span><div class="grow"><b>' + esc(s.name) + "</b>" + (n ? '<div class="muted" style="font-size:15px">' + esc(n.c.name) + " · " + esc(n.l.title) + "</div>" : '<div class="muted">افتح المادة لتصفّح دوراتها</div>') + "</div>" +
+        (n ? '<a class="btn primary" href="#/l/' + s.id + "|" + n.c.id + "|" + n.l.id + '">ابدأ</a>' : '<a class="btn" href="#/s/' + s.id + '">افتح</a>') + "</div>";
     }).join("") + "</div></div>";
+    h += '<div class="card" style="margin-top:12px"><h3>تعديل الأوقات</h3><div class="grid g2f"><label class="field">البداية<input id="pst" type="time" value="' + esc(p.start) + '"></label><label class="field">النهاية<input id="pen" type="time" value="' + esc(p.end) + '"></label><label class="field">الاستراحة بين المواد (دقائق)<input id="pgp" type="number" min="0" max="30" value="' + p.gap + '"></label></div>' +
+      '<p class="muted small" style="margin:12px 0 6px">أيام الدراسة</p><div class="chips wrap2">' + DAYN.map(function (d) { return '<button class="cp" data-day="' + d[0] + '" aria-pressed="' + (p.days.indexOf(d[0]) >= 0) + '">' + d[1] + "</button>"; }).join("") + "</div>" +
+      '<p class="muted small" style="margin:12px 0 6px">المواد (بالترتيب الذي تختاره)</p><div class="chips wrap2">' + PLANSUBS.filter(sub).map(function (sid) { var k = p.subs.indexOf(sid); return '<button class="cp" data-psub="' + sid + '" aria-pressed="' + (k >= 0) + '">' + (k >= 0 ? (k + 1) + ". " : "") + esc(sub(sid).name) + "</button>"; }).join("") + "</div>" +
+      '<div class="row" style="margin-top:14px"><button class="btn primary" id="psave">حفظ</button><button class="btn" id="preset">إعادة الضبط</button></div><p class="muted small" style="margin:8px 0 0">يُضبط تذكير الإشعار على وقت البداية وعلى الأيام التي تختارها.</p></div>';
     h += '<div class="note">الدرس التالي لكل مادة هو أول درس لم تُتمّه. إن غبتَ لا يتقدم المؤشر، فتبدأ بالدرس الفائت.</div>';
     shell(h, "#/plan");
-  }
-
-  /* ---------- internal discussion (retrieval from the attached books only, no AI, no network) ---------- */
-  var CH = { sid: null, mode: "ask", idx: {}, msgs: [], current: null, loading: false };
-  var STOP = {};
-  "من في على الى عن ما هو هي هذا هذه ذلك التي الذي ان كان لا لم لن قد كل اي او ثم بين مع هل كيف لماذا ماذا متي اين اذا حتي بعد قبل عند منه فيه عليه له لها لهم وهو وهي وما ولا وان انه انها كما بل لكن ايضا غير ذلك".split(" ").forEach(function (w) { STOP[w] = 1; });
-  function normAr(s) { return String(s).replace(/[ً-ٰٟـ]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/[^ء-ي0-9]+/g, " ").trim(); }
-  function stem(w) {
-    w = w.replace(/^(وال|بال|كال|فال|لل|ال)/, ""); if (w.length > 4) w = w.replace(/^(و|ف)/, "");
-    if (w.length > 4) w = w.replace(/(ها|هم|ات|ون|ين|ان)$/, ""); if (w.length > 3) w = w.replace(/(ه|ي)$/, "");
-    return w;
-  }
-  function toks(s) { return normAr(s).split(" ").filter(function (w) { return w.length > 1 && !STOP[w]; }).map(stem).filter(function (w) { return w.length > 1; }); }
-
-  function buildIndex(data) {
-    var inv = {}, len = [], tot = 0;
-    data.chunks.forEach(function (c, i) {
-      var t = toks(c[2]), tf = {}; t.forEach(function (w) { tf[w] = (tf[w] || 0) + 1; });
-      len[i] = t.length; tot += t.length;
-      Object.keys(tf).forEach(function (w) { (inv[w] = inv[w] || []).push([i, tf[w]]); });
-    });
-    return { data: data, inv: inv, len: len, avg: tot / Math.max(1, data.chunks.length), N: data.chunks.length };
-  }
-  function idf(ix, w) { var n = (ix.inv[w] || []).length; return Math.log(1 + (ix.N - n + 0.5) / (n + 0.5)); }
-  function search(ix, q, k) {
-    var qt = toks(q), sc = {}; if (!qt.length) return [];
-    var seenT = {}; qt.forEach(function (w) {
-      if (seenT[w]) return; seenT[w] = 1; var post = ix.inv[w]; if (!post) return; var id = idf(ix, w);
-      post.forEach(function (p) { var i = p[0], tf = p[1], d = 1.2 * (0.25 + 0.75 * ix.len[i] / ix.avg); sc[i] = (sc[i] || 0) + id * (tf * 2.2) / (tf + d); });
-    });
-    var arr = Object.keys(sc).map(function (i) { return [+i, sc[i]]; }).sort(function (a, b) { return b[1] - a[1]; });
-    var out = [], perBook = {};
-    for (var j = 0; j < arr.length && out.length < k; j++) { var c = ix.data.chunks[arr[j][0]], b = c[0]; if ((perBook[b] || 0) >= 2) continue; perBook[b] = (perBook[b] || 0) + 1; out.push({ i: arr[j][0], score: arr[j][1] }); }
-    return out;
-  }
-  function highlight(text, qt) {
-    var set = {}; qt.forEach(function (w) { set[w] = 1; });
-    return esc(text).replace(/[ء-يً-ٰٟـ]+/g, function (word) { var st = stem(normAr(word)); return set[st] ? "<mark>" + word + "</mark>" : word; });
-  }
-  function loadCorpus(sid) {
-    if (CH.idx[sid]) return Promise.resolve(CH.idx[sid]);
-    return fetch("corpus/" + sid + ".json").then(function (r) { return r.json(); }).then(function (d) { CH.idx[sid] = buildIndex(d); return CH.idx[sid]; });
-  }
-  var CSUBJ = [["nahw", "النحو"], ["sarf", "الصرف"], ["mantiq", "المنطق"], ["balagha", "البلاغة"], ["aqaid", "العقائد"], ["fiqh0", "الفقه"], ["fiqh", "الفقه الاستدلالي"], ["usul", "الأصول"], ["falsafa", "الفلسفة"], ["hadith", "الحديث"]];
-
-  function passageHtml(ix, p, qt) {
-    var c = ix.data.chunks[p.i], b = ix.data.books[c[0]];
-    return '<div class="quote"><div class="qt">' + highlight(c[2], qt) + '</div><div class="qsrc">' + esc(b.title) + " · ص " + c[1] + " (تقريبية)</div></div>";
-  }
-  function addMsg(who, html) { CH.msgs.push({ who: who, html: html }); }
-  function renderChat() {
-    var box = document.getElementById("chatbox"); if (!box) return;
-    box.innerHTML = CH.msgs.map(function (m) { return '<div class="msg ' + m.who + '">' + m.html + "</div>"; }).join("");
-    box.scrollTop = box.scrollHeight;
-  }
-  function clean(ix, text) { var t = toks(text); if (t.length < 12) return 0; var ok = t.filter(function (w) { return (ix.inv[w] || []).length >= 4; }).length; return ok / t.length; }
-  function pickDiscuss(ix) {
-    var best = null, bs = -1;
-    for (var t = 0; t < 120; t++) { var c = ix.data.chunks[Math.floor(Math.random() * ix.N)]; var n = c[2].length; if (n < 320 || n > 760 || /d{3,}/.test(c[2])) continue; var s = clean(ix, c[2]); if (s > bs) { bs = s; best = c; } if (s >= 0.9) break; }
-    return best || ix.data.chunks[Math.floor(Math.random() * ix.N)];
-  }
-  function keyTerms(ix, text) {
-    var seen = {}, arr = []; toks(text).forEach(function (w) { var df = (ix.inv[w] || []).length; if (!seen[w] && w.length > 2 && df >= 4 && df < ix.N * 0.04) { seen[w] = 1; arr.push([w, idf(ix, w)]); } });
-    return arr.sort(function (a, b) { return b[1] - a[1]; }).slice(0, 8).map(function (x) { return x[0]; });
-  }
-  function startDiscuss() {
-    var ix = CH.idx[CH.sid]; if (!ix) return; var c = pickDiscuss(ix), b = ix.data.books[c[0]];
-    CH.current = { text: c[2], terms: keyTerms(ix, c[2]) };
-    addMsg("bot", "لنتباحث في هذا النص من «" + esc(b.title) + "». اقرأه ثم اكتب بأسلوبك: ما الفكرة التي يقررها؟ وما الألفاظ المهمة فيه؟<div class=\"quote\"><div class=\"qt\">" + esc(c[2]) + "</div><div class=\"qsrc\">" + esc(b.title) + " · ص " + c[1] + " (تقريبية)</div></div>");
-  }
-  function evalAnswer(text) {
-    var cur = CH.current, mine = {}; toks(text).forEach(function (w) { mine[w] = 1; });
-    var hit = cur.terms.filter(function (w) { return mine[w]; }), miss = cur.terms.filter(function (w) { return !mine[w]; });
-    var pct = Math.round(hit.length * 100 / cur.terms.length), verdict = pct >= 70 ? "أحسنت، غطّيتَ أغلب مفاتيح النص." : pct >= 40 ? "جيد، لكن بقيت نقاط مهمة." : "راجع النص ثم أعد الكتابة، فقد فاتتك مفاتيح كثيرة.";
-    var html = "<b>" + verdict + "</b><br>تقدير تقريبي بالكلمات المفتاحية: " + hit.length + " من " + cur.terms.length + " (" + pct + "%).";
-    if (hit.length) html += '<div class="muted small">وردت عندك: ' + esc(hit.join("، ")) + "</div>";
-    if (miss.length) html += '<div class="muted small">لم ترد: ' + esc(miss.join("، ")) + "</div>";
-    html += '<div class="row" style="margin-top:8px"><button class="btn primary" id="nextd">نص آخر</button><button class="btn" id="toask">إلى وضع السؤال</button></div><div class="muted small" style="margin-top:6px">هذا مقياس آلي بسيط للكلمات، وليس تقييمًا علميًا. اعرض إجابتك على أستاذك.</div>';
-    return html;
-  }
-  function answerAsk(q) {
-    var ix = CH.idx[CH.sid], qt = toks(q), res = search(ix, q, 3);
-    if (!res.length || res[0].score < 1.2) { addMsg("bot", "لم أجد في الكتب المرفقة لهذه المادة ما يجيب عن سؤالك. جرّب كلمات أخرى أو مادة أخرى."); return; }
-    addMsg("bot", "وجدتُ هذه المقاطع في الكتب المرفقة (نقلٌ حرفي من نص مستخرج آليًا، فقد تظهر فيه أخطاء):" + res.map(function (p) { return passageHtml(ix, p, qt); }).join(""));
-  }
-  function pageChat() {
-    var sid = CH.sid || "nahw";
-    var h = '<div class="hero"><h1>المباحثة</h1><p>ناقش الكتب المرفقة: اسأل فتأتيك مقاطع منها، أو اطلب أن نتباحث في نص ويُقاس فهمك.</p></div>';
-    h += '<div class="chips">' + CSUBJ.map(function (s) { return '<button class="cp" data-sid="' + s[0] + '" aria-pressed="' + (s[0] === sid) + '">' + s[1] + "</button>"; }).join("") + "</div>";
-    h += '<div class="seg" style="margin-top:10px"><button data-m="ask" aria-selected="' + (CH.mode === "ask") + '">اسأل الكتب</button><button data-m="discuss" aria-selected="' + (CH.mode === "discuss") + '">باحثني في نص</button></div>';
-    h += '<div id="chatbox" class="chatbox" aria-live="polite"></div>';
-    h += '<form class="chatform" id="chatform"><input id="chatin" type="text" autocomplete="off" placeholder="' + (CH.mode === "ask" ? "اكتب سؤالك من الكتاب…" : "اكتب شرحك للنص…") + '"><button class="btn primary" type="submit" id="chatsend">إرسال</button></form>';
-    h += '<div class="note">المحتوى كله مقتطف حرفيًا من الكتب المرفقة (' + CSUBJ.length + ' مواد)، بلا توليد ولا اتصال بأي خدمة ذكاء. النص مستخرج آليًا من مسوحات وقد يحوي أخطاء.</div>';
-    shell(h, "#/chat");
-    [].forEach.call(document.querySelectorAll(".cp"), function (b) { b.onclick = function () { CH.sid = b.getAttribute("data-sid"); CH.msgs = []; CH.current = null; pageChat(); }; });
-    [].forEach.call(document.querySelectorAll(".seg [data-m]"), function (b) { b.onclick = function () { CH.mode = b.getAttribute("data-m"); CH.msgs = []; CH.current = null; pageChat(); }; });
-    var ready = function () {
-      if (!CH.msgs.length) { addMsg("bot", CH.mode === "ask" ? "السلام عليكم. اسألني عن أي مسألة في كتب «" + esc((CSUBJ.filter(function (s) { return s[0] === sid; })[0] || [0, ""])[1]) + "» وأنقل لك ما ورد فيها." : "سأعرض عليك نصًا من الكتب، اشرحه لي بأسلوبك ثم أقيس أهم مفاتيحه."); if (CH.mode === "discuss") startDiscuss(); }
-      renderChat(); bindChat();
-    };
-    CH.sid = sid;
-    if (CH.idx[sid]) ready(); else { addMsg("bot", "جارٍ تحميل كتب المادة…"); renderChat(); loadCorpus(sid).then(function () { CH.msgs = []; ready(); }).catch(function () { CH.msgs = []; addMsg("bot", "تعذّر تحميل كتب هذه المادة. تحقق من الاتصال."); renderChat(); }); }
-  }
-  function bindChat() {
-    var f = document.getElementById("chatform"); if (!f) return;
-    f.onsubmit = function (e) {
-      e.preventDefault(); var inp = document.getElementById("chatin"), v = inp.value.trim(); if (!v || !CH.idx[CH.sid]) return; inp.value = "";
-      addMsg("me", esc(v));
-      if (CH.mode === "ask") answerAsk(v);
-      else if (CH.current) { addMsg("bot", evalAnswer(v)); renderChat(); var nx = document.getElementById("nextd"), ta = document.getElementById("toask"); if (nx) nx.onclick = function () { CH.current = null; startDiscuss(); renderChat(); }; if (ta) ta.onclick = function () { CH.mode = "ask"; CH.msgs = []; pageChat(); }; return; }
-      renderChat();
-    };
+    var draft = JSON.parse(JSON.stringify(p));
+    function readInputs() { draft.start = document.getElementById("pst").value || draft.start; draft.end = document.getElementById("pen").value || draft.end; draft.gap = Math.max(0, Math.min(30, parseInt(document.getElementById("pgp").value, 10) || 0)); }
+    [].forEach.call(document.querySelectorAll("[data-day]"), function (b) { b.onclick = function () { readInputs(); var d = parseInt(b.getAttribute("data-day"), 10), k = draft.days.indexOf(d); if (k >= 0) draft.days.splice(k, 1); else draft.days.push(d); ls("hz:plan", JSON.stringify(draft)); pagePlan(); }; });
+    [].forEach.call(document.querySelectorAll("[data-psub]"), function (b) { b.onclick = function () { readInputs(); var s = b.getAttribute("data-psub"), k = draft.subs.indexOf(s); if (k >= 0) { if (draft.subs.length > 1) draft.subs.splice(k, 1); } else draft.subs.push(s); ls("hz:plan", JSON.stringify(draft)); pagePlan(); }; });
+    document.getElementById("psave").onclick = function () { readInputs(); if (mins(draft.end) <= mins(draft.start)) { toast("وقت النهاية يجب أن يكون بعد البداية."); return; } ls("hz:plan", JSON.stringify(draft)); schedule(); toast("حُفظ جدولك."); pagePlan(); };
+    document.getElementById("preset").onclick = function () { ls("hz:plan", null); schedule(); toast("أُعيد الجدول الافتراضي."); pagePlan(); };
   }
 
   /* ---------- router ---------- */
@@ -305,6 +250,7 @@
     var h = location.hash || "#/", m;
     if ((m = h.match(/^#\/s\/(.+)$/))) return pageSubject(decodeURIComponent(m[1]));
     if ((m = h.match(/^#\/l\/(.+)$/))) return pageLesson(decodeURIComponent(m[1]));
+    if ((m = h.match(/^#\/audio(?:\/(.+))?$/))) return pageAudio(m[1] ? decodeURIComponent(m[1]) : null);
     if (h === "#/chat") return pageChat();
     if (h === "#/plan") return pagePlan();
     if (h === "#/books") return pageBooks();
@@ -317,9 +263,9 @@
     var LN = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; if (!isNative || !LN) return;
     try {
       var p = await LN.requestPermissions(); if (p.display !== "granted") return;
-      var days = [7, 1, 2, 3, 4]; /* Sat, Sun, Mon, Tue, Wed */
+      var pl = getPlan(), t = mins(pl.start);
       await LN.cancel({ notifications: [1, 2, 3, 4, 5, 6, 7].map(function (d) { return { id: 800 + d }; }) });
-      await LN.schedule({ notifications: days.map(function (d) { return { id: 800 + d, title: "حوزتي", body: "حان موعد درس اليوم. افتح التطبيق وتابع من حيث توقفت.", schedule: { on: { weekday: d, hour: 8, minute: 0 }, allowWhileIdle: true } }; }) });
+      await LN.schedule({ notifications: pl.days.map(function (d) { return { id: 800 + d + 1, title: "حوزتي", body: "حان موعد درس اليوم. افتح التطبيق وتابع من حيث توقفت.", schedule: { on: { weekday: d + 1, hour: Math.floor(t / 60), minute: t % 60 }, allowWhileIdle: true } }; }) });
     } catch (e) {}
   }
 

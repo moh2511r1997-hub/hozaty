@@ -150,6 +150,7 @@ for (const [sid, list] of Object.entries(SPEC)) {
 const QMAP = { "ألفية ابن مالك": "alfiya_201812", "مغني اللبيب": "moharram1965_gmail_20180428", "منهاج الصالحين": "mnhjasasalheen-2_202006", "شرائع الإسلام": "01_20220505_202205", "اللمعة الدمشقية": "AAlexandrina-190221", "المكاسب الشيخ الأنصاري": "almkaseb-murtada-alansari_20200628", "أصول الفقه المظفر": "Osulalfeqh", "دروس في علم الأصول الحلقة الأولى": "droosfielmalosul_3", "دروس في علم الأصول الحلقة الثانية": "droosfielmalosul_3", "دروس في علم الأصول الحلقة الثالثة": "droosfielmalosul_3", "فرائد الأصول الرسائل": "abd-albaqir-360", "كفاية الأصول": "20200829_20200829_2116", "بداية الحكمة": "20230721_20230721_0707", "نهاية الحكمة": "moamenquraish_gmail_11", "البداية في علم الدراية": "almoamltv_gmail_20140330_1148", "تفسير الميزان": "almizan_alami_22j" };
 let linked = 0;
 for (const sub of data.subjects) for (const c of sub.courses) if (c.q && QMAP[c.q] && !c.book) { c.bookUrl = "https://archive.org/details/" + QMAP[c.q]; delete c.q; linked++; }
+data.audio = JSON.parse(fs.readFileSync(path.join(root, "data", "howza.json"), "utf8"));
 data.missing = [...new Set(data.subjects.flatMap((s) => s.courses.map((c) => c.q).filter(Boolean)))];
 fs.mkdirSync(path.join(root, "web"), { recursive: true });
 fs.writeFileSync(path.join(root, "web", "data.json"), JSON.stringify(data));
