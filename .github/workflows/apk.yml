@@ -25,7 +25,7 @@ jobs:
         run: |
           R=android/app/src/main/res
           rm -f $R/drawable/ic_launcher_background.xml $R/drawable-v24/ic_launcher_foreground.xml $R/drawable/ic_launcher_foreground.xml
-          cp -r assets/android/res/. $R/
+          cp -r assets/launcher/res/. $R/
           ls $R/mipmap-anydpi-v26 $R/mipmap-xxxhdpi
       - name: Notification permissions
         run: |
