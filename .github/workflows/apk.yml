@@ -40,8 +40,17 @@ jobs:
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
-      - run: cp android/app/build/outputs/apk/debug/app-debug.apk hozaty.apk
+      - name: Build signed release APK (not debuggable)
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/assets/debug.keystore -Pandroid.injected.signing.store.password=android -Pandroid.injected.signing.key.alias=androiddebugkey -Pandroid.injected.signing.key.password=android
+      - run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk hozaty-debug.apk
+          cp android/app/build/outputs/apk/release/app-release.apk hozaty.apk
+          sha256sum hozaty.apk hozaty-debug.apk | tee checksums.txt
       - uses: actions/upload-artifact@v4
         with:
           name: hozaty-debug-apk
-          path: hozaty.apk
+          path: |
+            hozaty.apk
+            hozaty-debug.apk
+            checksums.txt
