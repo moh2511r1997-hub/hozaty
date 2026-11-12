@@ -69,45 +69,110 @@ const SCI = {
     ["cosmo", "الانفجار العظيم وتوسع الكون", "XaT9Piac72k", "العلم بالملعقة"]
   ]
 };
+const OS = "https://openstax.org/books/";
+const REF = {
+  physics: {
+    motion: ["OpenStax University Physics Vol.1، الفصل 3: Motion Along a Straight Line", OS + "university-physics-volume-1/pages/3-introduction"],
+    force: ["OpenStax University Physics Vol.1، الفصل 5: Newton's Laws of Motion", OS + "university-physics-volume-1/pages/5-introduction"],
+    energy: ["OpenStax University Physics Vol.1، الفصل 7: Work and Kinetic Energy", OS + "university-physics-volume-1/pages/7-introduction"],
+    kin: ["OpenStax University Physics Vol.1، الفصل 4: Motion in Two and Three Dimensions", OS + "university-physics-volume-1/pages/4-introduction"],
+    newton: ["OpenStax University Physics Vol.1، الفصل 5: Newton's Laws of Motion", OS + "university-physics-volume-1/pages/5-introduction"],
+    work: ["OpenStax University Physics Vol.1، الفصل 8: Potential Energy and Conservation of Energy", OS + "university-physics-volume-1/pages/8-introduction"],
+    charge: ["OpenStax University Physics Vol.2، الفصل 5: Electric Charges and Fields", OS + "university-physics-volume-2/pages/5-introduction"],
+    circuits: ["OpenStax University Physics Vol.2، الفصل 10: Direct-Current Circuits", OS + "university-physics-volume-2/pages/10-introduction"],
+    mag: ["OpenStax University Physics Vol.2، الفصل 11: Magnetic Forces and Fields", OS + "university-physics-volume-2/pages/11-introduction"],
+    wave: ["OpenStax University Physics Vol.1، الفصل 16: Waves", OS + "university-physics-volume-1/pages/16-introduction"],
+    optics: ["OpenStax University Physics Vol.3، الفصل 1: The Nature of Light", OS + "university-physics-volume-3/pages/1-introduction"],
+    thermo: ["OpenStax University Physics Vol.2، الفصل 3: The First Law of Thermodynamics", OS + "university-physics-volume-2/pages/3-introduction"],
+    sr: ["OpenStax University Physics Vol.3، الفصل 5: Relativity", OS + "university-physics-volume-3/pages/5-introduction"],
+    qm: ["OpenStax University Physics Vol.3، الفصل 7: Quantum Mechanics", OS + "university-physics-volume-3/pages/7-introduction"]
+  },
+  astro: {
+    sky: ["OpenStax Astronomy 2e، الفصل 2: Observing the Sky", OS + "astronomy-2e/pages/1-introduction"],
+    cal: ["OpenStax Astronomy 2e، الفصل 4: Earth, Moon, and Sky", OS + "astronomy-2e/pages/1-introduction"],
+    obs: ["OpenStax Astronomy 2e، الفصل 6: Astronomical Instruments", OS + "astronomy-2e/pages/1-introduction"],
+    ss: ["OpenStax Astronomy 2e، الفصل 7: Other Worlds, an Introduction to the Solar System", OS + "astronomy-2e/pages/1-introduction"],
+    sun: ["OpenStax Astronomy 2e، الفصل 15: The Sun", OS + "astronomy-2e/pages/1-introduction"],
+    stars: ["OpenStax Astronomy 2e، الفصل 22: Stars from Adolescence to Old Age", OS + "astronomy-2e/pages/1-introduction"],
+    galaxy: ["OpenStax Astronomy 2e، الفصل 26: Galaxies", OS + "astronomy-2e/pages/1-introduction"],
+    bh: ["OpenStax Astronomy 2e، الفصل 24: Black Holes and Curved Spacetime", OS + "astronomy-2e/pages/1-introduction"],
+    cosmo: ["OpenStax Astronomy 2e، الفصل 30: The Big Bang", OS + "astronomy-2e/pages/1-introduction"]
+  }
+};
 const topics = JSON.parse(fs.readFileSync(path.join(root, "data", "topics.json"), "utf8"));
 const sci = (sid) => SCI[sid].map((u, i) => {
   const t = topics[sid + ":" + u[0]];
-  return { n: i + 1, id: u[2], title: u[1], ch: u[3], read: t ? t.text : "", refs: t ? t.sources : [] };
+  const r = REF[sid][u[0]];
+  return { n: i + 1, id: u[2], title: u[1], ch: u[3], read: t ? t.text : "", refs: t ? t.sources : [], book: r ? { title: r[0], url: r[1] } : null };
 });
 
+const pl = (id, name, ch, count, note) => ({ id: "pl-" + id.slice(-8), name, ch, count, note: note || "", playlist: id, lessons: [] });
+const ADV = [
+  { id: "lumaa", name: "اللمعة الدمشقية", dept: "السطوح", icon: "fiqh", books: [], courses: [
+    pl("PLKxikzZNxA6Fv8xzCQuAGPqWSLojCf7sf", "شرح اللمعة الدمشقية", INST, 444, "المعهد: الفقه الاستدلالي (سطوح)")
+  ] },
+  { id: "usul", name: "أصول الفقه", dept: "السطوح", icon: "usul", books: [], courses: [
+    pl("PL3aG68x9FJJNoRJzKQZZuI3tLUfd20yua", "شرح أصول الفقه للمظفر", "الشيخ محمد خزعل المالكي", 306, "للمبتدئين في الأصول"),
+    pl("PL1NMY451gI7Zvu8sebUTCqlZK-ByteSe9", "شرح الحلقة الثالثة (السيد الشهيد الصدر)", "تراث السيد كمال الحيدري", 120, "الحلقة الثالثة"),
+    pl("PLT_PtgMEfGos7vLjZcxothWK256iz9gty", "شرح كفاية الأصول", "السيد رشيد الحسيني", 437, "كفاية الأصول (الآخوند الخراساني)"),
+    pl("PL3aG68x9FJJNmk93mByR4Bbv38ujtQqn_", "شرح فرائد الأصول (الرسائل)", "الشيخ إسكندر الجعفري", 116, "رسائل الشيخ الأنصاري")
+  ] },
+  { id: "fiqh", name: "الفقه (المكاسب)", dept: "السطوح", icon: "fiqh", books: [], courses: [
+    pl("PLXNQQLzru0ZFhFKCC20OL3HpdlLXtyS69", "المكاسب المحرمة، ج1", "الشيخ جعفر آل طوق", 212, "مكاسب الشيخ الأنصاري")
+  ] },
+  { id: "kharij", name: "بحث الخارج", dept: "بحث الخارج", icon: "kharij", books: [], courses: [
+    pl("PLKxikzZNxA6Htfqd9x-qg3JOXHAV2L899", "بحث الفقه", INST + " (الشيخ باقر الإيرواني)", 370, "خارج الفقه"),
+    pl("PLHASXv5O7U58N1gRB0SQP9hBbaK2fEub6", "مفاتيح عملية الاستنباط الفقهي", "السيد كمال الحيدري", 534, "خارج الفقه"),
+    pl("PLKBYpgQj3ZUokAnwEFJtSBxyrq5Qm8r1h", "بحث خارج أصول الفقه 1444هـ", "السيد جعفر الحسيني الشيرازي", 128, "خارج الأصول"),
+    pl("PLL8f2rvO55U2zPbLyX64TrjCvL6fToMVA", "بحث خارج أصول الفقه", "السيد منير الخباز", 15, "خارج الأصول"),
+    pl("PL3aG68x9FJJPosAGDA45yzremewW5txUN", "خارج الفقه: كتاب الصوم", "السيد أبو القاسم الخوئي (دروس مسجلة)", 25, "خارج الفقه")
+  ] }
+];
 const books = (sid) => BOOKS[sid].map(([f, t]) => ({ file: f, title: t }));
 const data = {
   subjects: [
-    { id: "nahw", name: "النحو", dept: "الدراسات الحوزوية", icon: "nahw", books: books("nahw"), courses: [
+    { id: "nahw", name: "النحو", dept: "المقدمات", icon: "nahw", books: books("nahw"), courses: [
       { id: "nahw-ajr", name: "متن الأجرومية ودروس في النحو", note: "محاضرات المعهد", lessons: inst(pairs(nahw1), "المحاضرة"), book: BOOKS.nahw[1][0] },
       { id: "nahw-tuhfa", name: "التحفة السنية بشرح المقدمة الأجرومية", note: "تُعرض الدروس المتوفرة على القناة", lessons: inst(pairs(nahw2), "الدرس"), book: BOOKS.nahw[0][0] },
       { id: "nahw-tamhidi", name: "دروس تمهيدية في قواعد اللغة العربية", note: "المرحلة التمهيدية", lessons: inst(seq(nahwTamhidi), "الدرس"), book: BOOKS.nahw[1][0] },
       { id: "nahw-qatr", name: "شرح قطر الندى وبل الصدى", note: "الجزء الأول", lessons: inst(seq(qatr), "الدرس"), book: BOOKS.nahw[3][0] }
     ] },
-    { id: "sarf", name: "الصرف", dept: "الدراسات الحوزوية", icon: "sarf", books: books("sarf"), courses: [
+    { id: "sarf", name: "الصرف", dept: "المقدمات", icon: "sarf", books: books("sarf"), courses: [
       { id: "sarf-mukhtasar", name: "علم الصرف (مختصر الصرف)", note: "حلقات المعهد", lessons: inst(pairs(sarf), "الحلقة"), book: BOOKS.sarf[1][0] }
     ] },
-    { id: "mantiq", name: "المنطق", dept: "الدراسات الحوزوية", icon: "mantiq", books: books("mantiq"), courses: [
+    { id: "mantiq", name: "المنطق", dept: "المقدمات", icon: "mantiq", books: books("mantiq"), courses: [
       { id: "mantiq-khulasa", name: "خلاصة المنطق", note: "المرحلة التمهيدية", lessons: inst(pairs(mantiq), "الدرس"), book: BOOKS.mantiq[0][0] }
     ] },
-    { id: "balagha", name: "البلاغة", dept: "الدراسات الحوزوية", icon: "balagha", books: books("balagha"), courses: [
+    { id: "balagha", name: "البلاغة", dept: "المقدمات", icon: "balagha", books: books("balagha"), courses: [
       { id: "balagha-tahdhib", name: "البلاغة (تهذيب البلاغة)", note: "دروس المعهد", lessons: inst(pairs(balagha), "الدرس"), book: BOOKS.balagha[1][0] }
     ] },
-    { id: "aqaid", name: "العقائد", dept: "الدراسات الحوزوية", icon: "aqaid", books: books("aqaid"), courses: [
+    { id: "aqaid", name: "العقائد", dept: "المقدمات", icon: "aqaid", books: books("aqaid"), courses: [
       { id: "aqaid-tamhidi", name: "دروس تمهيدية في عقائد الشيعة الإمامية", note: "المرحلة التمهيدية", lessons: inst(seq(aqaidT), "الدرس"), book: BOOKS.aqaid[0][0] },
       { id: "aqaid-first", name: "شرح عقائد الإمامية (المقدمات الأولى)", note: "الشيخ ورد زين العابدين الحلبي", lessons: inst(pairs(aqaid1), "الدرس"), book: BOOKS.aqaid[0][0] }
     ] },
-    { id: "physics", name: "الفيزياء", dept: "العلوم", icon: "physics", books: [], courses: [
+    ...ADV,
+    { id: "physics", name: "الفيزياء", dept: "العلوم", icon: "physics", books: [
+      { url: OS + "university-physics-volume-1", title: "University Physics Vol.1 (OpenStax، مجاني بترخيص CC BY)" },
+      { url: OS + "university-physics-volume-2", title: "University Physics Vol.2 (OpenStax)" },
+      { url: OS + "university-physics-volume-3", title: "University Physics Vol.3 (OpenStax)" }
+    ], courses: [
       { id: "physics-core", name: "الفيزياء من المفاهيم إلى الحديثة", note: "شروح أساتذة عرب + مقال تعريفي من ويكيبيديا العربية", lessons: sci("physics") }
     ] },
-    { id: "astro", name: "الفلك", dept: "العلوم", icon: "astro", books: [], courses: [
+    { id: "astro", name: "الفلك", dept: "العلوم", icon: "astro", books: [
+      { url: OS + "astronomy-2e", title: "Astronomy 2e (OpenStax، مجاني بترخيص CC BY)" }
+    ], courses: [
       { id: "astro-core", name: "الفلك والكونيات", note: "شروح عربية + مقال تعريفي من ويكيبيديا العربية", lessons: sci("astro") }
     ] }
   ]
 };
+data.missing = [
+  "متن الأجرومية (الأصل)", "مختصر الصرف (الفضلي)", "تهذيب البلاغة (الكتاب المقرر)", "مختصر الإلهيات",
+  "اللمعة الدمشقية", "أصول الفقه (المظفر)", "الحلقات (الصدر)", "كفاية الأصول", "المكاسب", "فرائد الأصول (الرسائل)"
+];
 fs.mkdirSync(path.join(root, "web"), { recursive: true });
 fs.writeFileSync(path.join(root, "web", "data.json"), JSON.stringify(data));
 const total = data.subjects.reduce((a, s) => a + s.courses.reduce((b, c) => b + c.lessons.length, 0), 0);
+const plays = data.subjects.reduce((a, s) => a + s.courses.filter((c) => c.playlist && !c.lessons.length).length, 0);
 const ids = data.subjects.flatMap((s) => s.courses.flatMap((c) => c.lessons.map((l) => l.id)));
 const bad = ids.filter((x) => !/^[A-Za-z0-9_-]{11}$/.test(x));
-console.log("lessons:", total, "bad ids:", bad.length ? bad.join(",") : "none", "dupes:", ids.length - new Set(ids).size);
+console.log("playlists:", plays, "lessons:", total, "bad ids:", bad.length ? bad.join(",") : "none", "dupes:", ids.length - new Set(ids).size);

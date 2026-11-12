@@ -20,7 +20,7 @@ jobs:
       - run: npm install
       - run: npx cap add android
       - name: App icons from the official logo (assets/icon-only.png)
-        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#FFFFFF' --iconBackgroundColorDark '#FFFFFF'
+        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#0A4C98' --iconBackgroundColorDark '#0A4C98' --splashBackgroundColor '#FFFFFF' --splashBackgroundColorDark '#FFFFFF'
       - name: Notification permissions
         run: |
           M=android/app/src/main/AndroidManifest.xml

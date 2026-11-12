@@ -29,6 +29,9 @@
     aqaid: '<path d="M12 3a8 8 0 1 0 8 9 6 6 0 1 1-8-9z"/><path d="M17 4l.7 1.8L19.5 6l-1.8.7L17 8.5l-.7-1.8L14.5 6l1.8-.2z"/>',
     physics: '<circle cx="12" cy="12" r="1.8"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/>',
     astro: '<circle cx="12" cy="12" r="4.5"/><path d="M2.5 15c3-3 13-9 19-6"/><path d="M21.5 9c-3 3-13 9-19 6"/>',
+    fiqh: '<path d="M12 3v18M5 7h14"/><path d="M5 7l-2 6a3 3 0 0 0 4 0zM19 7l-2 6a3 3 0 0 0 4 0z"/><path d="M8 21h8"/>',
+    usul: '<path d="M4 20V6a2 2 0 0 1 2-2h12v14H6a2 2 0 0 0-2 2z"/><path d="M9 8h6M9 12h6"/>',
+    kharij: '<path d="M3 9l9-5 9 5-9 5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.500 5-3v-4.500"/>',
     home: '<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>',
     books: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',
     compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
@@ -42,7 +45,7 @@
 
   /* ---------- layout ---------- */
   function shell(inner, tab) {
-    var nav = [["#/", "الدروس", "home"], ["#/plan", "الجدول", "cal"], ["#/books", "الكتب", "books"], ["#/qibla", "القبلة", "compass"], ["#/about", "حول", "info"]];
+    var nav = [["#/", "الدروس", "home"], ["#/plan", "الجدول", "cal"], ["#/books", "الكتب", "books"], ["#/about", "حول", "info"]];
     root.innerHTML = '<div class="wrap"><header class="top"><img src="' + LOGO + '" alt="شعار حوزتي"><div class="name">حوزتي</div><button class="iconbtn" id="theme" aria-label="تبديل المظهر">◐</button></header>' + inner + "</div>" +
       '<nav class="bottom" aria-label="التنقل">' + nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === tab ? ' aria-current="page"' : "") + ">" + svg(n[2]) + "<span>" + n[1] + "</span></a>"; }).join("") + "</nav>";
     document.getElementById("theme").onclick = function () { var cur = document.documentElement.getAttribute("data-theme"); var dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme:dark)").matches; var nx = dark ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nx); ls("hz:theme", nx); };
@@ -54,13 +57,13 @@
     var done = getDone(), h = '<div class="hero"><h1>دروسك اليومية</h1><p>اختر مادة، ثم اختر الدرس. كل درس يفتح شرحه على يوتيوب.</p></div>';
     var last = ls("hz:last"), cont = "";
     if (last) { var p = last.split("|"), s = sub(p[0]); if (s) cont = '<a class="btn accent" href="#/l/' + esc(last) + '" style="margin-bottom:14px">' + svg("link") + "تابع من حيث توقفت</a>"; }
-    var groups = {};
+    var groups = {}, ORDER = ["المقدمات", "السطوح", "بحث الخارج", "العلوم"];
     D.subjects.forEach(function (s) { (groups[s.dept] = groups[s.dept] || []).push(s); });
     h += cont;
-    Object.keys(groups).forEach(function (dep) {
+    ORDER.filter(function (d) { return groups[d]; }).forEach(function (dep) {
       h += '<div class="sec"><h2>' + esc(dep) + '</h2></div><div class="grid">' + groups[dep].map(function (s) {
         var c = count(s, done), pct = c[1] ? Math.round(c[0] * 100 / c[1]) : 0;
-        return '<a class="tile" href="#/s/' + s.id + '"><img class="wm" src="' + LOGO + '" alt=""><span class="ic">' + svg(s.icon) + "</span><b>" + esc(s.name) + "</b><small>" + c[1] + " درساً</small>" +
+        return '<a class="tile" href="#/s/' + s.id + '"><img class="wm" src="' + LOGO + '" alt=""><span class="ic">' + svg(s.icon) + "</span><b>" + esc(s.name) + "</b><small>" + (c[1] ? c[1] + " درساً" : s.courses.length + " دورة") + "</small>" +
           '<div class="bar" title="' + pct + '%"><i style="width:' + pct + '%"></i></div></a>';
       }).join("") + "</div>";
     });
@@ -71,6 +74,10 @@
     var s = sub(sid); if (!s) return pageHome(); var done = getDone();
     var h = '<div class="crumb"><a href="#/">الدروس</a> › <span>' + esc(s.name) + '</span></div><div class="hero"><h1>' + esc(s.name) + '</h1><p class="muted">' + esc(s.dept) + "</p></div>";
     s.courses.forEach(function (c, ci) {
+      if (c.playlist && !c.lessons.length) {
+        h += '<a class="card" style="display:block;margin-bottom:10px;text-decoration:none;color:inherit" target="_blank" rel="noopener" href="https://www.youtube.com/playlist?list=' + c.playlist + '"><div class="row" style="justify-content:space-between"><h3>' + esc(c.name) + '</h3><span class="chip">' + c.count + ' فيديو</span></div><p class="muted" style="margin:6px 0 0">' + esc(c.ch) + (c.note ? " · " + esc(c.note) : "") + '</p><p style="margin:8px 0 0;color:var(--turq-ink);font-family:var(--title);font-weight:600">▶ افتح القائمة على يوتيوب</p></a>';
+        return;
+      }
       h += '<div class="sec"><h2>' + esc(c.name) + "</h2><small>" + esc(c.note || "") + "</small></div><div class=\"lessons\">" + c.lessons.map(function (l, li) {
         var d = done[key(s.id, c.id, l.id)];
         return '<a class="les' + (d ? " done" : "") + '" href="#/l/' + s.id + "|" + c.id + "|" + l.id + '"><span class="num">' + (d ? '<img src="' + LOGO + '" alt="">' : l.n) + "</span><small>" + (d ? "تم" : "الدرس") + "</small></a>";
@@ -80,7 +87,7 @@
     shell(h, "#/");
   }
 
-  function bookRow(b) { return '<div class="item"><span class="pdf">PDF</span><div class="grow"><b>' + esc(b.title) + '</b></div><a class="btn" target="_blank" rel="noopener" href="' + bookUrl(b.file) + '">فتح</a></div>'; }
+  function bookRow(b) { var ext = !!b.url; return '<div class="item"><span class="pdf" style="' + (ext ? "background:var(--turq-ink)" : "") + '">' + (ext ? "WEB" : "PDF") + '</span><div class="grow"><b>' + esc(b.title) + '</b></div><a class="btn" target="_blank" rel="noopener" href="' + (ext ? esc(b.url) : bookUrl(b.file)) + '">فتح</a></div>'; }
 
   function find(sid, cid, lid) {
     var s = sub(sid); if (!s) return null; var c = s.courses.filter(function (x) { return x.id === cid; })[0]; if (!c) return null;
@@ -98,6 +105,7 @@
     h += '<div class="row" style="margin-block:12px"><a class="btn primary" target="_blank" rel="noopener" href="' + yt(f.l.id) + '">▶ شاهد على يوتيوب</a>' +
       (f.c.book ? '<a class="btn" target="_blank" rel="noopener" href="' + bookUrl(f.c.book) + '">' + svg("pdf") + "كتاب الدرس PDF</a>" : "") +
       '<button class="btn ' + (isDone ? "ok" : "accent") + '" id="done">' + svg("check") + (isDone ? "تم الدرس (إلغاء)" : "أتممتُ الدرس") + "</button></div>";
+    if (f.l.book) h += '<div class="card" style="margin-top:8px"><h3>الكتاب المعتمد</h3><p style="margin:4px 0 8px">' + esc(f.l.book.title) + '</p><a class="btn" target="_blank" rel="noopener" href="' + esc(f.l.book.url) + '">' + svg("pdf") + 'افتح الكتاب</a></div>';
     if (f.l.read) {
       h += '<div class="sec"><h2>للقراءة</h2><span class="chip">ويكيبيديا العربية</span></div><div class="card"><div class="read">' + esc(f.l.read) + "</div></div>";
       h += '<div class="note">المصدر: ' + f.l.refs.map(function (r) { return '<a target="_blank" rel="noopener" href="' + esc(r.url) + '">' + esc(r.title) + "</a>"; }).join("، ") + ". النص مختصر ومرخّص CC BY-SA 4.0.</div>";
@@ -112,49 +120,16 @@
     D.subjects.filter(function (s) { return s.books.length; }).forEach(function (s) {
       h += '<div class="sec"><h2>' + esc(s.name) + '</h2><small>' + s.books.length + ' كتاب</small></div><div class="card"><div class="list">' + s.books.map(bookRow).join("") + "</div></div>";
     });
+    if (D.missing && D.missing.length) {
+      h += '<div class="sec"><h2>كتب مقررة لم تُضَف بعد</h2></div><div class="card"><p class="muted" style="margin-top:0">لم أجد لها نسخة أصلية موثوقة للتنزيل. اضغط للبحث عنها في أرشيف الإنترنت، واختر الطبعة المعتمدة.</p><div class="list">' + D.missing.map(function (t) { return '<div class="item"><div class="grow"><b>' + esc(t) + '</b></div><a class="btn" target="_blank" rel="noopener" href="https://archive.org/search?query=' + encodeURIComponent(t.replace(/\(.*\)/, "").trim()) + '">ابحث</a></div>'; }).join("") + "</div></div>";
+    }
     h += '<div class="note">نسخ ممسوحة ضوئيًا من الأرشيف. تحقق من الطبعة المعتمدة عند أستاذك. التسمية من سجل المنهج وقد تحتاج مراجعة.</div>';
     shell(h, "#/books");
   }
 
-  /* ---------- qibla & prayer times (location) ---------- */
-  var KAABA = { lat: 21.4225, lon: 39.8262 };
-  function rad(d) { return d * Math.PI / 180; } function deg(r) { return r * 180 / Math.PI; }
-  function qiblaBearing(lat, lon) { var p1 = rad(lat), p2 = rad(KAABA.lat), dl = rad(KAABA.lon - lon); var y = Math.sin(dl) * Math.cos(p2), x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl); return (deg(Math.atan2(y, x)) + 360) % 360; }
-  function fixA(a) { a = a % 360; return a < 0 ? a + 360 : a; } function fixH(h) { h = h % 24; return h < 0 ? h + 24 : h; }
-  function prayerTimes(date, lat, lon) {
-    var tz = -date.getTimezoneOffset() / 60, jd = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000 + 2440587.5 - lon / 360;
-    var D2 = jd - 2451545.0, g = fixA(357.529 + 0.98560028 * D2), q = fixA(280.459 + 0.98564736 * D2), L = fixA(q + 1.915 * Math.sin(rad(g)) + 0.020 * Math.sin(rad(2 * g))), e = 23.439 - 0.00000036 * D2;
-    var RA = fixH(deg(Math.atan2(Math.cos(rad(e)) * Math.sin(rad(L)), Math.cos(rad(L)))) / 15), eqt = q / 15 - RA, decl = deg(Math.asin(Math.sin(rad(e)) * Math.sin(rad(L)))), noon = 12 + tz - lon / 15 - eqt;
-    function T(a) { var c = (-Math.sin(rad(a)) - Math.sin(rad(decl)) * Math.sin(rad(lat))) / (Math.cos(rad(decl)) * Math.cos(rad(lat))); return (c < -1 || c > 1) ? NaN : deg(Math.acos(c)) / 15; }
-    return { fajr: noon - T(16), sunrise: noon - T(0.833), dhuhr: noon, sunset: noon + T(0.833), maghrib: noon + T(4), isha: noon + T(14) };
-  }
-  function fmt(h) { if (isNaN(h)) return "—"; h = fixH(h + 1 / 120); var H = Math.floor(h), M = Math.floor((h - H) * 60); return (H % 12 === 0 ? 12 : H % 12) + ":" + (M < 10 ? "0" : "") + M + (H >= 12 ? " م" : " ص"); }
-  function geo() { try { return JSON.parse(ls("hz:geo") || "null"); } catch (e) { return null; } }
-  var geoMsg = "";
-  function pageQibla() {
-    var g = geo(), h = '<div class="hero"><h1>القبلة وأوقات الصلاة</h1><p>تُحسب على جهازك، ولا يُرسل موقعك إلى أي جهة.</p></div>';
-    if (!g) { h += '<div class="card"><p>اسمح بالوصول إلى الموقع لحساب اتجاه القبلة وأوقات الصلاة.</p><button class="btn primary" id="geo">حدّد موقعي</button>' + (geoMsg ? '<p class="muted" style="margin-top:10px">' + geoMsg + "</p>" : "") + "</div>"; shell(h, "#/qibla"); document.getElementById("geo").onclick = askGeo; return; }
-    var b = qiblaBearing(g.lat, g.lon), t = prayerTimes(new Date(), g.lat, g.lon);
-    var rows = [["الفجر", t.fajr], ["الشروق", t.sunrise], ["الظهر", t.dhuhr], ["الغروب", t.sunset], ["المغرب", t.maghrib], ["العشاء", t.isha]];
-    h += '<div class="grid wide"><div class="card"><h3>اتجاه القبلة</h3><div class="compass"><div class="n">الشمال</div><div class="arrow" style="transform:rotate(' + b.toFixed(1) + 'deg)"><i></i></div></div><p style="text-align:center;margin:0"><b>' + b.toFixed(1) + '°</b> من الشمال مع عقارب الساعة</p><p class="muted" style="text-align:center;font-size:14px">قارنها ببوصلة هاتفك للتأكد.</p></div>' +
-      '<div class="card"><div class="row" style="justify-content:space-between"><h3>أوقات الصلاة اليوم</h3><span class="chip">طريقة الجعفري</span></div><div class="list">' + rows.map(function (r) { return '<div class="item"><div class="grow">' + r[0] + '</div><b>' + fmt(r[1]) + "</b></div>"; }).join("") + '</div><p class="muted" style="font-size:14px">حساب تقريبي قد يختلف بدقائق عن التقويم المعتمد. اعتمد تقويم مرجعك احتياطًا.</p></div></div>' +
-      '<div class="row" style="margin-top:12px"><button class="btn" id="geo">حدّث موقعي</button><button class="btn" id="geoc">امسح موقعي</button></div><p class="muted" style="font-size:14px">الموقع: ' + g.lat.toFixed(3) + "، " + g.lon.toFixed(3) + "</p>";
-    shell(h, "#/qibla"); document.getElementById("geo").onclick = askGeo; document.getElementById("geoc").onclick = function () { ls("hz:geo", null); pageQibla(); };
-  }
-  async function askGeo() {
-    geoMsg = "جارٍ تحديد الموقع…"; pageQibla();
-    try {
-      var G = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation, pos;
-      if (isNative && G) { var pm = await G.requestPermissions(); if (pm.location !== "granted" && pm.coarseLocation !== "granted") throw new Error("denied"); pos = await G.getCurrentPosition({ enableHighAccuracy: false, timeout: 20000 }); }
-      else pos = await new Promise(function (ok, no) { if (!navigator.geolocation) return no(new Error("none")); navigator.geolocation.getCurrentPosition(ok, no, { timeout: 20000 }); });
-      ls("hz:geo", JSON.stringify({ lat: pos.coords.latitude, lon: pos.coords.longitude })); geoMsg = "";
-    } catch (e) { geoMsg = "تعذّر تحديد الموقع. تأكد من السماح بالوصول وتشغيل GPS."; }
-    pageQibla();
-  }
-
   function pageAbout() {
-    var h = '<div class="hero landing"><img src="' + LOGO + '" alt="شعار حوزتي" width="120" height="120" style="border-radius:28px;background:#fff;box-shadow:var(--shadow)"><h1>حوزتي</h1><p>منصة دروس للمقدمات الحوزوية مع الفيزياء والفلك. كل درس مربوط بشرحه على يوتيوب، وكل كتب المنهج بصيغة PDF.</p></div>';
-    h += '<div class="card"><h3>مصادر الشروح</h3><p>الدروس الحوزوية: قناة <b>معهد تراث الأنبياء للدراسات الحوزوية</b> على يوتيوب. دروس الفيزياء والفلك: أساتذة وجهات علمية عرب، ويُذكر اسم المقدِّم في كل درس.</p><p class="muted" style="margin:0">التطبيق لا ينتج الشروح ولا يعدّلها، وإنما يرتّبها ويربطها. الحقوق لأصحابها.</p></div>';
+    var h = '<div class="hero landing"><img src="img/logo-wide.png" alt="شعار حوزتي" width="320" style="max-width:80%;height:auto"><h1>حوزتي</h1><p>منصة دروس للمقدمات الحوزوية مع الفيزياء والفلك. كل درس مربوط بشرحه على يوتيوب، وكل كتب المنهج بصيغة PDF.</p></div>';
+    h += '<div class="card"><h3>مصادر الشروح</h3><p>مرحلة المقدمات: قناة <b>معهد تراث الأنبياء للدراسات الحوزوية</b> على يوتيوب. السطوح وبحث الخارج: قوائم دروس لأساتذة ومراجع يُذكر اسم كل منهم. الفيزياء والفلك: شروح أساتذة وعلماء عرب مع الكتاب المعتمد (OpenStax).</p><p class="muted" style="margin:0">التطبيق لا ينتج الشروح ولا يعدّلها، وإنما يرتّبها ويربطها. الحقوق لأصحابها.</p></div>';
     h += '<div class="card" style="margin-top:12px"><h3>نصوص القراءة</h3><p style="margin:0">نصوص الفيزياء والفلك مختصرة من ويكيبيديا العربية بترخيص CC BY-SA 4.0 ومنسوبة لمقالاتها.</p></div>';
     h += '<div class="card" style="margin-top:12px"><h3>تنبيه</h3><p style="margin:0">لا يقدّم التطبيق فتاوى. وتسمية بعض الكتب من سجل المنهج وتحتاج مراجعة أستاذ. ترتيب المنهج حسب المعهد وليس منهجًا رسميًا للنجف.</p></div>';
     if (!isNative) h += '<div class="card" style="margin-top:12px"><h3>تطبيق أندرويد</h3><p>ثبّت التطبيق على هاتفك لتصلك تذكير الثامنة صباحًا كل يوم.</p><a class="btn primary" href="' + APK + '">تحميل التطبيق (APK)</a></div>';
@@ -193,7 +168,6 @@
     if ((m = h.match(/^#\/l\/(.+)$/))) return pageLesson(decodeURIComponent(m[1]));
     if (h === "#/plan") return pagePlan();
     if (h === "#/books") return pageBooks();
-    if (h === "#/qibla") return pageQibla();
     if (h === "#/about") return pageAbout();
     pageHome();
   }
