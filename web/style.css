@@ -82,3 +82,4 @@ nav.bottom a[aria-current="page"]{color:var(--turq-ink);font-weight:700}
 @media (min-width:900px){body{font-size:17px}}
 
 .slot{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.slot:last-child{border-bottom:0}.slot .t{min-width:112px;font-weight:700;color:var(--turq-ink);font-variant-numeric:tabular-nums}.slot .grow{flex:1;min-width:0}.days{display:flex;gap:8px;flex-wrap:wrap;margin-block:10px}.day{padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px}.day.now{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}.day.off{opacity:.55;text-decoration:line-through}
+.day.sci{border-color:var(--turq);color:var(--turq-ink)}
