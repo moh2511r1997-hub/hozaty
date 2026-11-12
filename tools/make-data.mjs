@@ -51,128 +51,95 @@ const BOOKS = {
 };
 
 // science: unit id -> [title, videoId, channel]
-const SCI = {
-  physics: [
-    ["motion", "الحركة والسرعة", "XKi5YV9No6I", "الأستاذ منتظر الخفاجي"], ["force", "القوة", "GNJr1pL6HwE", "الأستاذ علي السوداني"],
-    ["energy", "الطاقة والشغل", "Cb3Doa2QHG4", "محمد زيادة"], ["kin", "معادلات الحركة", "tqXU9S3tymQ", "الأستاذ علي السوداني"],
-    ["newton", "قوانين نيوتن للحركة", "VDT9uxAoenM", "الأستاذ منتظر الخفاجي"], ["work", "الشغل والطاقة الحركية", "m7JTv_n2bEo", "khalled physics"],
-    ["charge", "الشحنة والمجال الكهربائي", "QzfQ5ZDHxN4", "الأستاذ علي السوداني"], ["circuits", "الدوائر الكهربائية وقانون أوم", "GTJnJXdUNno", "عزام زقزوق"],
-    ["mag", "المغناطيسية", "WbDxzWxU6rI", "قناة العلوم"], ["wave", "الموجات", "Y0pfgEVgjWs", "محمد فاروق"],
-    ["optics", "البصريات", "lQnbhu8Efjw", "محمد ناجي"], ["thermo", "الديناميكا الحرارية", "yR37JC9Vajk", "محمد زيادة"],
-    ["sr", "النسبية الخاصة", "sTNXep569Mo", "العلم بالملعقة"], ["qm", "مدخل إلى ميكانيكا الكم", "no14BMI_0BE", "باختصار"]
-  ],
-  astro: [
-    ["sky", "السماء الليلية والكوكبات", "bKySzMFLE7U", "The BST Astronomy"], ["cal", "التقويم والفصول", "LNEhbt5Nugk", "أحسن العلوم"],
-    ["obs", "المقراب (التلسكوب)", "OutUI4eKpP4", "علوم واختراعات بالمختصر"], ["ss", "المجموعة الشمسية", "bPajcMkGcbk", "SolarBalls بالعربي"],
-    ["sun", "الشمس", "AAjIPao8Wyo", "MT_for_Space"], ["stars", "النجوم ودورة حياتها", "QEXe6htlp8o", "ASTRO-MUSTAFA"],
-    ["galaxy", "المجرات", "l_W18Dtsg64", "أسئلة نص الليل"], ["bh", "الثقوب السوداء", "ha4VhfCrsVg", "حسين عبدالله"],
-    ["cosmo", "الانفجار العظيم وتوسع الكون", "XaT9Piac72k", "العلم بالملعقة"]
-  ]
-};
-const OS = "https://openstax.org/books/";
-const REF = {
-  physics: {
-    motion: ["OpenStax University Physics Vol.1، الفصل 3: Motion Along a Straight Line", OS + "university-physics-volume-1/pages/3-introduction"],
-    force: ["OpenStax University Physics Vol.1، الفصل 5: Newton's Laws of Motion", OS + "university-physics-volume-1/pages/5-introduction"],
-    energy: ["OpenStax University Physics Vol.1، الفصل 7: Work and Kinetic Energy", OS + "university-physics-volume-1/pages/7-introduction"],
-    kin: ["OpenStax University Physics Vol.1، الفصل 4: Motion in Two and Three Dimensions", OS + "university-physics-volume-1/pages/4-introduction"],
-    newton: ["OpenStax University Physics Vol.1، الفصل 5: Newton's Laws of Motion", OS + "university-physics-volume-1/pages/5-introduction"],
-    work: ["OpenStax University Physics Vol.1، الفصل 8: Potential Energy and Conservation of Energy", OS + "university-physics-volume-1/pages/8-introduction"],
-    charge: ["OpenStax University Physics Vol.2، الفصل 5: Electric Charges and Fields", OS + "university-physics-volume-2/pages/5-introduction"],
-    circuits: ["OpenStax University Physics Vol.2، الفصل 10: Direct-Current Circuits", OS + "university-physics-volume-2/pages/10-introduction"],
-    mag: ["OpenStax University Physics Vol.2، الفصل 11: Magnetic Forces and Fields", OS + "university-physics-volume-2/pages/11-introduction"],
-    wave: ["OpenStax University Physics Vol.1، الفصل 16: Waves", OS + "university-physics-volume-1/pages/16-introduction"],
-    optics: ["OpenStax University Physics Vol.3، الفصل 1: The Nature of Light", OS + "university-physics-volume-3/pages/1-introduction"],
-    thermo: ["OpenStax University Physics Vol.2، الفصل 3: The First Law of Thermodynamics", OS + "university-physics-volume-2/pages/3-introduction"],
-    sr: ["OpenStax University Physics Vol.3، الفصل 5: Relativity", OS + "university-physics-volume-3/pages/5-introduction"],
-    qm: ["OpenStax University Physics Vol.3، الفصل 7: Quantum Mechanics", OS + "university-physics-volume-3/pages/7-introduction"]
-  },
-  astro: {
-    sky: ["OpenStax Astronomy 2e، الفصل 2: Observing the Sky", OS + "astronomy-2e/pages/1-introduction"],
-    cal: ["OpenStax Astronomy 2e، الفصل 4: Earth, Moon, and Sky", OS + "astronomy-2e/pages/1-introduction"],
-    obs: ["OpenStax Astronomy 2e، الفصل 6: Astronomical Instruments", OS + "astronomy-2e/pages/1-introduction"],
-    ss: ["OpenStax Astronomy 2e، الفصل 7: Other Worlds, an Introduction to the Solar System", OS + "astronomy-2e/pages/1-introduction"],
-    sun: ["OpenStax Astronomy 2e، الفصل 15: The Sun", OS + "astronomy-2e/pages/1-introduction"],
-    stars: ["OpenStax Astronomy 2e، الفصل 22: Stars from Adolescence to Old Age", OS + "astronomy-2e/pages/1-introduction"],
-    galaxy: ["OpenStax Astronomy 2e، الفصل 26: Galaxies", OS + "astronomy-2e/pages/1-introduction"],
-    bh: ["OpenStax Astronomy 2e، الفصل 24: Black Holes and Curved Spacetime", OS + "astronomy-2e/pages/1-introduction"],
-    cosmo: ["OpenStax Astronomy 2e، الفصل 30: The Big Bang", OS + "astronomy-2e/pages/1-introduction"]
-  }
-};
-const topics = JSON.parse(fs.readFileSync(path.join(root, "data", "topics.json"), "utf8"));
-const sci = (sid) => SCI[sid].map((u, i) => {
-  const t = topics[sid + ":" + u[0]];
-  const r = REF[sid][u[0]];
-  return { n: i + 1, id: u[2], title: u[1], ch: u[3], read: t ? t.text : "", refs: t ? t.sources : [], book: r ? { title: r[0], url: r[1] } : null };
-});
-
-const pl = (id, name, ch, count, note) => ({ id: "pl-" + id.slice(-8), name, ch, count, note: note || "", playlist: id, lessons: [] });
-const ADV = [
-  { id: "lumaa", name: "اللمعة الدمشقية", dept: "السطوح", icon: "fiqh", books: [], courses: [
-    pl("PLKxikzZNxA6Fv8xzCQuAGPqWSLojCf7sf", "شرح اللمعة الدمشقية", INST, 444, "المعهد: الفقه الاستدلالي (سطوح)")
-  ] },
-  { id: "usul", name: "أصول الفقه", dept: "السطوح", icon: "usul", books: [], courses: [
-    pl("PL3aG68x9FJJNoRJzKQZZuI3tLUfd20yua", "شرح أصول الفقه للمظفر", "الشيخ محمد خزعل المالكي", 306, "للمبتدئين في الأصول"),
-    pl("PL1NMY451gI7Zvu8sebUTCqlZK-ByteSe9", "شرح الحلقة الثالثة (السيد الشهيد الصدر)", "تراث السيد كمال الحيدري", 120, "الحلقة الثالثة"),
-    pl("PLT_PtgMEfGos7vLjZcxothWK256iz9gty", "شرح كفاية الأصول", "السيد رشيد الحسيني", 437, "كفاية الأصول (الآخوند الخراساني)"),
-    pl("PL3aG68x9FJJNmk93mByR4Bbv38ujtQqn_", "شرح فرائد الأصول (الرسائل)", "الشيخ إسكندر الجعفري", 116, "رسائل الشيخ الأنصاري")
-  ] },
-  { id: "fiqh", name: "الفقه (المكاسب)", dept: "السطوح", icon: "fiqh", books: [], courses: [
-    pl("PLXNQQLzru0ZFhFKCC20OL3HpdlLXtyS69", "المكاسب المحرمة، ج1", "الشيخ جعفر آل طوق", 212, "مكاسب الشيخ الأنصاري")
-  ] },
-  { id: "kharij", name: "بحث الخارج", dept: "بحث الخارج", icon: "kharij", books: [], courses: [
-    pl("PLKxikzZNxA6Htfqd9x-qg3JOXHAV2L899", "بحث الفقه", INST + " (الشيخ باقر الإيرواني)", 370, "خارج الفقه"),
-    pl("PLHASXv5O7U58N1gRB0SQP9hBbaK2fEub6", "مفاتيح عملية الاستنباط الفقهي", "السيد كمال الحيدري", 534, "خارج الفقه"),
-    pl("PLKBYpgQj3ZUokAnwEFJtSBxyrq5Qm8r1h", "بحث خارج أصول الفقه 1444هـ", "السيد جعفر الحسيني الشيرازي", 128, "خارج الأصول"),
-    pl("PLL8f2rvO55U2zPbLyX64TrjCvL6fToMVA", "بحث خارج أصول الفقه", "السيد منير الخباز", 15, "خارج الأصول"),
-    pl("PL3aG68x9FJJPosAGDA45yzremewW5txUN", "خارج الفقه: كتاب الصوم", "السيد أبو القاسم الخوئي (دروس مسجلة)", 25, "خارج الفقه")
-  ] }
-];
+const pl = (id, name, ch, count, note, x = {}) => ({ id: "pl-" + id.slice(-9), name, ch, count, note: note || "", playlist: id, lessons: [], ...x });
+const B = (sid, i) => BOOKS[sid][i][0];
 const books = (sid) => BOOKS[sid].map(([f, t]) => ({ file: f, title: t }));
+const MALIKI = "الشيخ محمد خزعل المالكي", KAABI = "الشيخ صادق الكعبي البغدادي", ADHAM = "الشيخ أدهم العاسمي", TOQ = "الشيخ جعفر آل طوق", IRW = "الشيخ باقر الإيرواني", HAYDARI = "تراث السيد كمال الحيدري", USAMA = "الشيخ أسامة آل بلال النجفي";
+const QOM = "qom", NAJAF = "najaf";
+
 const data = {
   subjects: [
+    // ================= المقدمات =================
     { id: "nahw", name: "النحو", dept: "المقدمات", icon: "nahw", books: books("nahw"), courses: [
-      { id: "nahw-ajr", name: "متن الأجرومية ودروس في النحو", note: "محاضرات المعهد", lessons: inst(pairs(nahw1), "المحاضرة"), book: BOOKS.nahw[1][0] },
-      { id: "nahw-tuhfa", name: "التحفة السنية بشرح المقدمة الأجرومية", note: "تُعرض الدروس المتوفرة على القناة", lessons: inst(pairs(nahw2), "الدرس"), book: BOOKS.nahw[0][0] },
-      { id: "nahw-tamhidi", name: "دروس تمهيدية في قواعد اللغة العربية", note: "المرحلة التمهيدية", lessons: inst(seq(nahwTamhidi), "الدرس"), book: BOOKS.nahw[1][0] },
-      { id: "nahw-qatr", name: "شرح قطر الندى وبل الصدى", note: "الجزء الأول", lessons: inst(seq(qatr), "الدرس"), book: BOOKS.nahw[3][0] }
+      { id: "nahw-tamhidi", name: "دروس تمهيدية في قواعد اللغة العربية", note: "المرحلة التمهيدية", lessons: inst(seq(nahwTamhidi), "الدرس"), book: B("nahw", 1) },
+      { id: "nahw-ajr", name: "متن الأجرومية ودروس في النحو", note: "محاضرات المعهد", lessons: inst(pairs(nahw1), "المحاضرة"), book: B("nahw", 1) },
+      { id: "nahw-tuhfa", name: "التحفة السنية بشرح المقدمة الأجرومية", note: "تُعرض الدروس المتوفرة على القناة", lessons: inst(pairs(nahw2), "الدرس"), book: B("nahw", 0) },
+      { id: "nahw-qatr", name: "شرح قطر الندى وبل الصدى", note: "الجزء الأول", lessons: inst(seq(qatr), "الدرس"), book: B("nahw", 3) },
+      pl("PLT_PtgMEfGos_XsUj4pOswkFb_L9FnlQn", "شرح ابن الناظم على الألفية", MALIKI, 166, "الألفية", { q: "ألفية ابن مالك" }),
+      pl("PL63bIbPrz61A8K23Kj0S4v5iIwo_oK6Yk", "شرح ابن عقيل", "الأستاذ حيدر أحمد السعدي", 147, "شرح الألفية", { book: B("nahw", 4) }),
+      pl("PL3aG68x9FJJPv2jNOPeo4oXcLGBA1jBT2", "شرح الصمدية (جامع المقدمات)", "السيد علي الحسيني", 48, "منهج قم", { city: QOM, q: "الصمدية في النحو" }),
+      pl("PLhnf8Ho9iP6C74zQkmruml9Lqw8YVIAVj", "شرح مغني اللبيب", "محمد قايد سنان", 92, "نحو متقدم (قم)", { city: QOM, q: "مغني اللبيب" })
     ] },
     { id: "sarf", name: "الصرف", dept: "المقدمات", icon: "sarf", books: books("sarf"), courses: [
-      { id: "sarf-mukhtasar", name: "علم الصرف (مختصر الصرف)", note: "حلقات المعهد", lessons: inst(pairs(sarf), "الحلقة"), book: BOOKS.sarf[1][0] }
+      { id: "sarf-mukhtasar", name: "علم الصرف (مختصر الصرف)", note: "حلقات المعهد", lessons: inst(pairs(sarf), "الحلقة"), book: B("sarf", 1) },
+      pl("PLBYrhIQANPhEL4MosdVqVPKv3DCPv0wf-", "شذا العرف في فن الصرف", ADHAM, 49, "شرح الكتاب", { book: B("sarf", 1) })
     ] },
     { id: "mantiq", name: "المنطق", dept: "المقدمات", icon: "mantiq", books: books("mantiq"), courses: [
-      { id: "mantiq-khulasa", name: "خلاصة المنطق", note: "المرحلة التمهيدية", lessons: inst(pairs(mantiq), "الدرس"), book: BOOKS.mantiq[0][0] }
+      { id: "mantiq-khulasa", name: "خلاصة المنطق", note: "المرحلة التمهيدية", lessons: inst(pairs(mantiq), "الدرس"), book: B("mantiq", 0) },
+      pl("PL3aG68x9FJJNIWFxuIgmcm7kAkea6fiv4", "شرح منطق المظفر", KAABI, 184, "المنطق للمظفر", { book: B("mantiq", 1) }),
+      pl("PL3aG68x9FJJNxBTPId3BpXf6LOLNCzeKy", "شرح حاشية ملا عبد الله", KAABI, 114, "الحاشية على تهذيب المنطق", { book: B("mantiq", 3) })
     ] },
     { id: "balagha", name: "البلاغة", dept: "المقدمات", icon: "balagha", books: books("balagha"), courses: [
-      { id: "balagha-tahdhib", name: "البلاغة (تهذيب البلاغة)", note: "دروس المعهد", lessons: inst(pairs(balagha), "الدرس"), book: BOOKS.balagha[1][0] }
+      { id: "balagha-tahdhib", name: "البلاغة (تهذيب البلاغة)", note: "دروس المعهد", lessons: inst(pairs(balagha), "الدرس"), book: B("balagha", 1) },
+      pl("PLBYrhIQANPhFKwuBOQSpkszPWq9-7RqR4", "شرح جواهر البلاغة", ADHAM, 53, "جواهر البلاغة", { book: B("balagha", 0) }),
+      pl("PL3aG68x9FJJMZpfXau_C1i-gs7I8GtC-w", "شرح مختصر المعاني", MALIKI, 192, "علم المعاني", { book: B("balagha", 1) }),
+      pl("PL3aG68x9FJJMkq0G9sdguJCKbbX56QM4D", "شرح المطول (تلخيص المفتاح)", "الشيخ إياد العامري", 128, "بلاغة متقدمة (قم)", { city: QOM, q: "المطول شرح تلخيص المفتاح" })
     ] },
-    { id: "aqaid", name: "العقائد", dept: "المقدمات", icon: "aqaid", books: books("aqaid"), courses: [
-      { id: "aqaid-tamhidi", name: "دروس تمهيدية في عقائد الشيعة الإمامية", note: "المرحلة التمهيدية", lessons: inst(seq(aqaidT), "الدرس"), book: BOOKS.aqaid[0][0] },
-      { id: "aqaid-first", name: "شرح عقائد الإمامية (المقدمات الأولى)", note: "الشيخ ورد زين العابدين الحلبي", lessons: inst(pairs(aqaid1), "الدرس"), book: BOOKS.aqaid[0][0] }
+    { id: "aqaid", name: "العقائد وعلم الكلام", dept: "المقدمات", icon: "aqaid", books: books("aqaid"), courses: [
+      { id: "aqaid-tamhidi", name: "دروس تمهيدية في عقائد الشيعة الإمامية", note: "المرحلة التمهيدية", lessons: inst(seq(aqaidT), "الدرس"), book: B("aqaid", 0) },
+      { id: "aqaid-first", name: "شرح عقائد الإمامية (المقدمات الأولى)", note: "الشيخ ورد زين العابدين الحلبي", lessons: inst(pairs(aqaid1), "الدرس"), book: B("aqaid", 0) },
+      pl("PLPHnyCvrNCmJVxAEfIA-LjdY4a2lCbDHF", "شرح الباب الحادي عشر", USAMA, 50, "الحلي والسيوري", { book: B("aqaid", 1) }),
+      pl("PLGrjugrPlBEnrbcXpr2mpa9iTv6C8X-Es", "شرح تجريد الاعتقاد (كشف المراد)", IRW, 250, "كلام متقدم", { book: B("aqaid", 2) })
     ] },
-    ...ADV,
-    { id: "physics", name: "الفيزياء", dept: "العلوم", icon: "physics", books: [
-      { url: OS + "university-physics-volume-1", title: "University Physics Vol.1 (OpenStax، مجاني بترخيص CC BY)" },
-      { url: OS + "university-physics-volume-2", title: "University Physics Vol.2 (OpenStax)" },
-      { url: OS + "university-physics-volume-3", title: "University Physics Vol.3 (OpenStax)" }
-    ], courses: [
-      { id: "physics-core", name: "الفيزياء من المفاهيم إلى الحديثة", note: "شروح أساتذة عرب + مقال تعريفي من ويكيبيديا العربية", lessons: sci("physics") }
+    { id: "fiqh0", name: "الفقه التمهيدي", dept: "المقدمات", icon: "fiqh", books: [], courses: [
+      pl("PLKxikzZNxA6EHNwDapPW2ryHbeI5eU6IJ", "دروس تمهيدية في الفقه", INST, 42, "المرحلة التمهيدية"),
+      pl("PLKxikzZNxA6GC4aN88zehuovMVV2xb8He", "منهاج الصالحين، الجزء الأول (نص)", INST, 633, "العبادات", { q: "منهاج الصالحين" }),
+      pl("PLCmxrR8GSt0-AgNjvMVuglVaxt-pwRrTb", "منهاج الصالحين: كتاب الطهارة", "السيد رياض الموسوي", 74, "العبادات", { q: "منهاج الصالحين" })
     ] },
-    { id: "astro", name: "الفلك", dept: "العلوم", icon: "astro", books: [
-      { url: OS + "astronomy-2e", title: "Astronomy 2e (OpenStax، مجاني بترخيص CC BY)" }
-    ], courses: [
-      { id: "astro-core", name: "الفلك والكونيات", note: "شروح عربية + مقال تعريفي من ويكيبيديا العربية", lessons: sci("astro") }
+    // ================= السطوح =================
+    { id: "fiqh", name: "الفقه الاستدلالي", dept: "السطوح", icon: "fiqh", books: [], courses: [
+      pl("PLaRDQN4HSdzQPkq-BWP2bwbRwFumG4hzb", "شرح شرائع الإسلام (العبادات)", USAMA, 189, "المحقق الحلي", { q: "شرائع الإسلام" }),
+      pl("PLKxikzZNxA6Fv8xzCQuAGPqWSLojCf7sf", "شرح اللمعة الدمشقية", INST, 444, "الشهيدان", { q: "اللمعة الدمشقية" }),
+      pl("PLXNQQLzru0ZFhFKCC20OL3HpdlLXtyS69", "المكاسب المحرمة، ج1", TOQ, 212, "الشيخ الأنصاري", { q: "المكاسب الشيخ الأنصاري" }),
+      pl("PLHNhFObzjUqX1sjybXp7lKUMeG_whMbN_", "شرح العروة الوثقى", TOQ, 22, "السيد اليزدي", { q: "العروة الوثقى" })
+    ] },
+    { id: "usul", name: "أصول الفقه", dept: "السطوح", icon: "usul", books: [], courses: [
+      pl("PL3aG68x9FJJNoRJzKQZZuI3tLUfd20yua", "شرح أصول الفقه للمظفر", MALIKI, 306, "المرحلة الأولى", { q: "أصول الفقه المظفر" }),
+      pl("PLT_PtgMEfGovA4u5V-MitsO2dpFhNOpKz", "شرح الحلقة الأولى", MALIKI, 48, "السيد الشهيد الصدر", { q: "دروس في علم الأصول الحلقة الأولى" }),
+      pl("PL63bIbPrz61CbZ5mBh9edjZtuc5ywtRh3", "شرح الحلقة الثانية", "الأستاذ حيدر أحمد السعدي", 126, "السيد الشهيد الصدر", { q: "دروس في علم الأصول الحلقة الثانية" }),
+      pl("PL1NMY451gI7Zvu8sebUTCqlZK-ByteSe9", "شرح الحلقة الثالثة", HAYDARI, 120, "السيد الشهيد الصدر", { q: "دروس في علم الأصول الحلقة الثالثة" }),
+      pl("PLGrjugrPlBElUgc2xxdZVK3qznbtilk-e", "شرح معالم الأصول", IRW, 74, "معالم الدين", { q: "معالم الدين وملاذ المجتهدين" }),
+      pl("PL8TuIEFQemhYH9u_SHtLA1nfWahRlhHmS", "شرح قوانين الأصول", "الشيخ محمد جواد السليمي", 105, "المحقق القمي", { city: QOM, q: "قوانين الأصول" }),
+      pl("PL3aG68x9FJJNmk93mByR4Bbv38ujtQqn_", "شرح فرائد الأصول (الرسائل)", "الشيخ إسكندر الجعفري", 116, "الشيخ الأنصاري", { q: "فرائد الأصول الرسائل" }),
+      pl("PLT_PtgMEfGos7vLjZcxothWK256iz9gty", "شرح كفاية الأصول", "السيد رشيد الحسيني", 437, "الآخوند الخراساني", { q: "كفاية الأصول" })
+    ] },
+    { id: "falsafa", name: "الفلسفة والحكمة", dept: "السطوح", icon: "mantiq", books: [], courses: [
+      pl("PLGYpVOkcswCwQNIg3je_MFG-qrGcObyAD", "شرح بداية الحكمة", "الشيخ حميد العارضي", 169, "العلامة الطباطبائي", { q: "بداية الحكمة" }),
+      pl("PLXNQQLzru0ZHFOVN5ubMpw-DDrSP-27sM", "شرح نهاية الحكمة", TOQ, 354, "العلامة الطباطبائي", { q: "نهاية الحكمة" }),
+      pl("PLAHtf1vxkXdIlNmoa5MoDRG77Y3M60yv9", "شرح منظومة السبزواري", "Mahammed Hani", 70, "الحكيم السبزواري", { city: QOM, q: "شرح المنظومة السبزواري" }),
+      pl("PLAHtf1vxkXdK2guxOljKYGPAE34rt1QBC", "الحكمة المتعالية (الأسفار الأربعة) ج1", "Mahammed Hani", 390, "صدر المتألهين", { q: "الأسفار الأربعة" })
+    ] },
+    { id: "hadith", name: "الحديث والرجال والتفسير", dept: "السطوح", icon: "usul", books: [], courses: [
+      pl("PLHNhFObzjUqXOUJslHIMYOWgetYZ2qXxG", "شرح البداية في علم الدراية", "الشيخ أنمار المظفر", 58, "الشهيد الثاني", { q: "البداية في علم الدراية" }),
+      pl("PLXeLSwlKb4x9g3QEAptgLbWrIRInQIWi-", "دروس علم الرجال", "الشيخ فيصل العبادي", 22, "علم الرجال", { q: "علم الرجال" }),
+      pl("PLAHtf1vxkXdJ-tkpADmzqroStcrklIgvy", "تفسير الميزان", "Mahammed Hani", 276, "العلامة الطباطبائي", { q: "تفسير الميزان" })
+    ] },
+    // ================= بحث الخارج =================
+    { id: "kharij", name: "بحث الخارج", dept: "بحث الخارج", icon: "kharij", books: [], courses: [
+      pl("PLKxikzZNxA6Htfqd9x-qg3JOXHAV2L899", "بحث الفقه", INST + " (" + IRW + ")", 370, "خارج الفقه"),
+      pl("PLHASXv5O7U58N1gRB0SQP9hBbaK2fEub6", "مفاتيح عملية الاستنباط الفقهي", "السيد كمال الحيدري", 534, "خارج الفقه"),
+      pl("PLKBYpgQj3ZUokAnwEFJtSBxyrq5Qm8r1h", "بحث خارج أصول الفقه 1444هـ", "السيد جعفر الحسيني الشيرازي", 128, "خارج الأصول"),
+      pl("PLL8f2rvO55U2zPbLyX64TrjCvL6fToMVA", "بحث خارج أصول الفقه", "السيد منير الخباز", 15, "خارج الأصول"),
+      pl("PL3aG68x9FJJPosAGDA45yzremewW5txUN", "خارج الفقه: كتاب الصوم", "السيد أبو القاسم الخوئي (دروس مسجلة)", 25, "خارج الفقه")
     ] }
   ]
 };
-data.missing = [
-  "متن الأجرومية (الأصل)", "مختصر الصرف (الفضلي)", "تهذيب البلاغة (الكتاب المقرر)", "مختصر الإلهيات",
-  "اللمعة الدمشقية", "أصول الفقه (المظفر)", "الحلقات (الصدر)", "كفاية الأصول", "المكاسب", "فرائد الأصول (الرسائل)"
-];
+data.missing = [...new Set(data.subjects.flatMap((s) => s.courses.map((c) => c.q).filter(Boolean)))];
 fs.mkdirSync(path.join(root, "web"), { recursive: true });
 fs.writeFileSync(path.join(root, "web", "data.json"), JSON.stringify(data));
 const total = data.subjects.reduce((a, s) => a + s.courses.reduce((b, c) => b + c.lessons.length, 0), 0);
-const plays = data.subjects.reduce((a, s) => a + s.courses.filter((c) => c.playlist && !c.lessons.length).length, 0);
+const plays = data.subjects.reduce((a, s) => a + s.courses.filter((c) => c.playlist).length, 0);
 const ids = data.subjects.flatMap((s) => s.courses.flatMap((c) => c.lessons.map((l) => l.id)));
-const bad = ids.filter((x) => !/^[A-Za-z0-9_-]{11}$/.test(x));
-console.log("playlists:", plays, "lessons:", total, "bad ids:", bad.length ? bad.join(",") : "none", "dupes:", ids.length - new Set(ids).size);
+const pids = data.subjects.flatMap((s) => s.courses.filter((c) => c.playlist).map((c) => c.playlist));
+const bad = ids.filter((x) => !/^[A-Za-z0-9_-]{11}$/.test(x)), badP = pids.filter((x) => !/^PL[A-Za-z0-9_-]{16,40}$/.test(x));
+console.log("playlist courses:", plays, "video lessons:", total, "bad video ids:", bad.length ? bad.join(",") : "none", "bad playlist ids:", badP.length ? badP.join(",") : "none", "dupes:", ids.length - new Set(ids).size, "dupe playlists:", pids.length - new Set(pids).size);

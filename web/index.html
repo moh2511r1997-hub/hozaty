@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>try{var m=localStorage.getItem("hz:mode");if(m!=="light"&&m!=="dark")m=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";var D={light:"royal",dark:"night-blue"},t=localStorage.getItem("hz:th-"+m)||D[m];document.documentElement.setAttribute("data-mode",m);document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <title>حوزتي — دروس المقدمات الحوزوية والفيزياء والفلك</title>
 <meta name="description" content="كل درس مربوط بشرحه على يوتيوب، وكل كتب المنهج بصيغة PDF. النحو والصرف والمنطق والبلاغة والعقائد والفيزياء والفلك.">
 <meta name="theme-color" content="#102D55">
@@ -15,7 +16,8 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="splash" id="splash"><img src="img/logo-wide.png" alt="حوزتي"></div>
+<div class="splash" id="splash"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div></div>
+<div id="welcome"></div>
 <div id="app"></div>
 <noscript><p style="padding:20px">يحتاج التطبيق إلى تفعيل جافاسكربت.</p></noscript>
 <script src="app.js"></script>

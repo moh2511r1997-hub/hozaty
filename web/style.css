@@ -1,7 +1,13 @@
-:root{--bg:#F5F8FC;--surface:#fff;--ink:#102D55;--soft:#64748B;--line:#D8E2EE;--navy:#102D55;--turq:#08B8C5;--turq-ink:#067A84;--on-navy:#fff;--ok:#1B7F4B;
-  --title:"Cairo","Segoe UI",Tahoma,sans-serif;--ui:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--read:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--shadow:0 1px 2px rgba(16,45,85,.06),0 4px 14px rgba(16,45,85,.07);color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1A30;--surface:#102D55;--ink:#E8F1FB;--soft:#9DB3CF;--line:#28487A;--navy:#08B8C5;--turq-ink:#4CDCE6;--on-navy:#06233F;--ok:#5CC486;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0B1A30;--surface:#102D55;--ink:#E8F1FB;--soft:#9DB3CF;--line:#28487A;--navy:#08B8C5;--turq-ink:#4CDCE6;--on-navy:#06233F;--ok:#5CC486;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}
+:root{--title:"Cairo","Segoe UI",Tahoma,sans-serif;--ui:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--read:"Amiri Quran","Scheherazade New","Traditional Arabic",serif;--ok:#1B7F4B;--shadow:0 1px 2px rgba(16,45,85,.06),0 4px 14px rgba(16,45,85,.07);
+  --bg:#F5F8FC;--surface:#fff;--ink:#102D55;--soft:#64748B;--line:#D8E2EE;--navy:#102D55;--turq:#08B8C5;--turq-ink:#067A84;--on-navy:#fff;color-scheme:light}
+/* day themes (light mode) */
+html[data-theme="royal"]{--bg:#F5F8FC;--surface:#fff;--ink:#102D55;--soft:#64748B;--line:#D8E2EE;--navy:#102D55;--turq:#08B8C5;--turq-ink:#067A84;--on-navy:#fff;color-scheme:light}
+html[data-theme="emerald"]{--bg:#F2F9F5;--surface:#fff;--ink:#0D3B2E;--soft:#5B7A6E;--line:#D2E6DC;--navy:#0F5C46;--turq:#1FB58A;--turq-ink:#0B7A5A;--on-navy:#fff;color-scheme:light}
+html[data-theme="sand"]{--bg:#FBF7EE;--surface:#FFFFFF;--ink:#4A2F12;--soft:#8A7358;--line:#E9DEC8;--navy:#6B4420;--turq:#C98A1B;--turq-ink:#8A5A07;--on-navy:#fff;color-scheme:light}
+/* night themes (dark mode) */
+html[data-theme="night-blue"]{--bg:#0B1A30;--surface:#102D55;--ink:#E8F1FB;--soft:#9DB3CF;--line:#28487A;--navy:#08B8C5;--turq:#08B8C5;--turq-ink:#4CDCE6;--on-navy:#06233F;--ok:#5CC486;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}
+html[data-theme="night-green"]{--bg:#07211B;--surface:#0D3329;--ink:#E4F5EC;--soft:#96BBA9;--line:#1F5645;--navy:#2ED3A0;--turq:#2ED3A0;--turq-ink:#6BE6BF;--on-navy:#052019;--ok:#5CC486;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}
+html[data-theme="night-violet"]{--bg:#15122B;--surface:#211C47;--ink:#EDE9FE;--soft:#B3A9DD;--line:#3A3278;--navy:#A78BFA;--turq:#A78BFA;--turq-ink:#C4B5FD;--on-navy:#1B1340;--ok:#5CC486;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.9 var(--ui);padding-inline:max(14px,env(safe-area-inset-right));padding-top:env(safe-area-inset-top)}
@@ -83,3 +89,26 @@ nav.bottom a[aria-current="page"]{color:var(--turq-ink);font-weight:700}
 
 .slot{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.slot:last-child{border-bottom:0}.slot .t{min-width:112px;font-weight:700;color:var(--turq-ink);font-variant-numeric:tabular-nums}.slot .grow{flex:1;min-width:0}.days{display:flex;gap:8px;flex-wrap:wrap;margin-block:10px}.day{padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px}.day.now{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}.day.off{opacity:.55;text-decoration:line-through}
 .day.sci{border-color:var(--turq);color:var(--turq-ink)}
+
+.seg{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:10px;font-family:var(--title);font-weight:700;color:var(--soft)}
+.seg button[aria-selected="true"]{background:var(--navy);color:var(--on-navy)}
+.cc{margin-bottom:12px}
+.chip.alt{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border:2px solid var(--line);border-radius:14px;background:var(--bg)}
+.sw i{width:56px;height:56px;border-radius:50%;display:block;border:1px solid var(--line)}
+.sw span{font-family:var(--title);font-size:13px;font-weight:600}
+.sw[aria-pressed="true"]{border-color:var(--turq)}
+input[type="text"]{flex:1;min-width:0;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:18px var(--ui)}
+.btn:disabled{opacity:.5;cursor:default}
+#splash{background:var(--bg);color:var(--ink);text-align:center;padding:24px}
+#splash .bsm{font:400 clamp(34px,9vw,64px)/1.8 "Amiri Quran","Scheherazade New",serif;color:var(--turq-ink);animation:fadein 1s ease both}
+#splash .bsm small{display:block;font-size:.42em;color:var(--soft);margin-top:8px;font-family:var(--title)}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#welcome{position:fixed;inset:0;z-index:90;background:var(--bg);display:none;place-items:center;padding:20px}
+#welcome.on{display:grid}
+.wbox{width:min(420px,100%);display:grid;gap:10px;text-align:center}
+.wbox .wlogo{width:min(260px,70%);height:auto;margin:0 auto 6px;background:#fff;border-radius:20px;padding:8px}
+.wbox h1{font-size:28px}
+@media (prefers-reduced-motion:reduce){#splash .bsm{animation:none}}
