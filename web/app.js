@@ -94,17 +94,19 @@
     [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.onclick = function () { ls("hz:city", b.getAttribute("data-city")); pageHome(); }; });
   }
 
+  var SUBJ_OF_COURSE = null;
   function courseCard(c) {
     var chips = '<span class="chip">' + c.count + " فيديو</span>" + (c.city === "qom" ? ' <span class="chip alt">منهج قم</span>' : "");
     var bk = c.book ? '<a class="btn" target="_blank" rel="noopener" href="' + bookUrl(c.book) + '">' + svg("pdf") + "الكتاب PDF</a>" : c.bookUrl ? '<a class="btn" target="_blank" rel="noopener" href="' + esc(c.bookUrl) + '">' + svg("pdf") + "الكتاب (أرشيف الإنترنت)</a>" : (c.q ? '<a class="btn" target="_blank" rel="noopener" href="' + archive(c.q) + '">' + svg("pdf") + "ابحث عن الكتاب</a>" : "");
-    return '<div class="card cc"><div class="row" style="justify-content:space-between"><h3>' + esc(c.name) + "</h3><span>" + chips + '</span></div><p class="muted" style="margin:6px 0 10px">' + esc(c.ch) + (c.note ? " · " + esc(c.note) : "") + '</p><div class="row"><a class="btn primary" target="_blank" rel="noopener" href="' + plUrl(c.playlist) + '">▶ شرح الدروس على يوتيوب</a>' + bk + "</div></div>";
+    var au = (D.audio && D.audio.courses.some(function (x) { return x[0] === SUBJ_OF_COURSE; })) ? '<a class="btn" href="#/audio/' + SUBJ_OF_COURSE + '">🎧 صوتيات</a>' : "";
+    return '<div class="card cc"><div class="row" style="justify-content:space-between"><h3>' + esc(c.name) + "</h3><span>" + chips + '</span></div><p class="muted" style="margin:6px 0 10px">' + esc(c.ch) + (c.note ? " · " + esc(c.note) : "") + '</p><div class="row"><a class="btn primary" target="_blank" rel="noopener" href="' + plUrl(c.playlist) + '">▶ شرح الدروس على يوتيوب</a>' + au + bk + "</div></div>";
   }
 
   function pageSubject(sid) {
     var s = sub(sid); if (!s) return pageHome(); var done = getDone();
     var h = '<div class="crumb"><a href="#/">الدروس</a> › <span>' + esc(s.name) + '</span></div><div class="hero"><h1>' + esc(s.name) + '</h1><p class="muted">' + esc(s.dept) + " · " + (city() === "qom" ? "حوزة قم" : "حوزة النجف") + "</p></div>";
     visibleCourses(s).forEach(function (c) {
-      if (c.playlist && !c.lessons.length) { h += courseCard(c); return; }
+      if (c.playlist && !c.lessons.length) { SUBJ_OF_COURSE = s.id; h += courseCard(c); return; }
       h += '<div class="sec"><h2>' + esc(c.name) + "</h2><small>" + esc(c.note || "") + '</small></div>' +
         (c.book ? '<div class="row" style="margin-bottom:10px"><a class="btn" target="_blank" rel="noopener" href="' + bookUrl(c.book) + '">' + svg("pdf") + "كتاب الدورة PDF: " + esc(bookTitle(c.book)) + "</a></div>" : "") +
         '<div class="lessons">' + c.lessons.map(function (l) {
@@ -124,6 +126,26 @@
     var i = -1; c.lessons.forEach(function (l, k) { if (l.id === lid) i = k; }); if (i < 0) return null; return { s: s, c: c, i: i, l: c.lessons[i] };
   }
 
+  var LAMAP = { "nahw-ajr": 10092, "nahw-tamhidi": 10092, "nahw-tuhfa": 9044, "nahw-qatr": 9732, "aqaid-tamhidi": 8936, "aqaid-first": 9486 };
+  function lessonAudioCard(f) {
+    if (!D.audio) return "";
+    var list = []; D.audio.courses.forEach(function (c, i) { if (c[0] === f.s.id) list.push(i); });
+    if (!list.length) return "";
+    var pref = LAMAP[f.c.id], sel = list[0]; list.forEach(function (i) { if (D.audio.courses[i][1] === pref) sel = i; });
+    var exact = pref && D.audio.courses[sel][1] === pref;
+    var opts = list.map(function (i) { var c = D.audio.courses[i]; return '<option value="' + i + '"' + (i === sel ? " selected" : "") + ">" + esc(c[2]) + " (" + c[4] + ")</option>"; }).join("");
+    return '<div class="card" style="margin-top:8px"><h3>🎧 الصوت</h3><p class="muted small" style="margin:4px 0 8px">' + (exact ? "الدورة الصوتية لنفس الكتاب بصوت أحد أساتذة الحوزة." : "دورة صوتية في المادة نفسها لأستاذ من الحوزة، وقد يختلف الكتاب أو ترتيب الدروس.") + " الأرقام قد لا تطابق الفيديو تمامًا، فاضبط رقم الملف.</p>" +
+      '<select id="lasel" style="width:100%">' + opts + '</select><div class="row" style="margin-top:8px"><label class="row small" style="gap:6px">رقم الملف <input id="lanum" type="number" min="1" value="' + Math.max(1, f.l.n) + '" style="width:90px"></label><button class="btn primary" id="laplay">▶ شغّل</button></div>' +
+      '<audio id="laau" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="muted small" id="lat"></div></div>';
+  }
+  function bindLessonAudio() {
+    var sel = document.getElementById("lasel"); if (!sel) return;
+    var au = document.getElementById("laau"), num = document.getElementById("lanum"), t = document.getElementById("lat");
+    function play() { var c = D.audio.courses[parseInt(sel.value, 10)], i = Math.max(1, Math.min(c[4], parseInt(num.value, 10) || 1)); num.value = i; au.src = audioUrl(c, i); au.playbackRate = parseFloat(ls("hz:rate") || "1"); au.play().catch(function () {}); t.textContent = c[2] + " — الملف " + i + " من " + c[4]; }
+    document.getElementById("laplay").onclick = play; sel.onchange = function () { var c = D.audio.courses[parseInt(sel.value, 10)]; num.max = c[4]; };
+    au.onended = function () { num.value = (parseInt(num.value, 10) || 1) + 1; play(); };
+    au.onerror = function () { if (au.src) toast("تعذّر هذا الملف، جرّب رقمًا آخر."); };
+  }
   function pageLesson(ref) {
     var p = ref.split("|"), f = find(p[0], p[1], p[2]); if (!f) return pageHome();
     ls("hz:last", ref); var done = getDone(), k = key(f.s.id, f.c.id, f.l.id), isDone = !!done[k];
@@ -133,10 +155,12 @@
     h += '<a class="thumb" target="_blank" rel="noopener" href="' + yt(f.l.id) + '" aria-label="شاهد الشرح على يوتيوب"><img src="https://i.ytimg.com/vi/' + f.l.id + '/hqdefault.jpg" alt="" loading="lazy"><span class="play"><span><svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg></span></span></a>';
     h += '<p class="muted" style="margin-top:8px">شرح الدرس: <b>' + esc(f.l.ch) + "</b></p>";
     h += '<div class="row" style="margin-block:12px"><a class="btn primary" target="_blank" rel="noopener" href="' + yt(f.l.id) + '">▶ شاهد على يوتيوب</a>' +
-      (f.c.book ? '<a class="btn" target="_blank" rel="noopener" href="' + bookUrl(f.c.book) + '">' + svg("pdf") + "كتاب الدرس PDF</a>" : "") +
+      (f.c.book ? '<a class="btn" target="_blank" rel="noopener" href="' + bookUrl(f.c.book) + '">' + svg("pdf") + "ملف الدرس: " + esc(bookTitle(f.c.book) || "الكتاب") + " (PDF)</a>" : "") +
       '<button class="btn ' + (isDone ? "ok" : "accent") + '" id="done">' + svg("check") + (isDone ? "تم الدرس (إلغاء)" : "أتممتُ الدرس") + "</button></div>";
+    h += lessonAudioCard(f);
     h += '<div class="row" style="margin-top:16px;justify-content:space-between">' + (prev ? '<a class="btn" href="#/l/' + f.s.id + "|" + f.c.id + "|" + prev.id + '">→ السابق</a>' : "<span></span>") + (next ? '<a class="btn" href="#/l/' + f.s.id + "|" + f.c.id + "|" + next.id + '">التالي ←</a>' : "") + "</div>";
     shell(h, "#/");
+    bindLessonAudio();
     document.getElementById("done").onclick = function () { var d = getDone(); if (d[k]) delete d[k]; else d[k] = 1; setDone(d); pageLesson(ref); toast(d[k] ? "أحسنت، أُضيف إلى المنجَز." : "أُلغي الإنجاز."); };
   }
 
