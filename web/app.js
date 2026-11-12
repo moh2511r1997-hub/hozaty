@@ -35,13 +35,14 @@
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
     pdf: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/>',
     link: '<path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1"/><path d="M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/>',
+    cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     check: '<path d="M5 12l5 5 9-10"/>'
   };
   function svg(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + P[n] + "</svg>"; }
 
   /* ---------- layout ---------- */
   function shell(inner, tab) {
-    var nav = [["#/", "الدروس", "home"], ["#/books", "الكتب", "books"], ["#/qibla", "القبلة", "compass"], ["#/about", "حول", "info"]];
+    var nav = [["#/", "الدروس", "home"], ["#/plan", "الجدول", "cal"], ["#/books", "الكتب", "books"], ["#/qibla", "القبلة", "compass"], ["#/about", "حول", "info"]];
     root.innerHTML = '<div class="wrap"><header class="top"><img src="' + LOGO + '" alt="شعار حوزتي"><div class="name">حوزتي</div><button class="iconbtn" id="theme" aria-label="تبديل المظهر">◐</button></header>' + inner + "</div>" +
       '<nav class="bottom" aria-label="التنقل">' + nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === tab ? ' aria-current="page"' : "") + ">" + svg(n[2]) + "<span>" + n[1] + "</span></a>"; }).join("") + "</nav>";
     document.getElementById("theme").onclick = function () { var cur = document.documentElement.getAttribute("data-theme"); var dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme:dark)").matches; var nx = dark ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nx); ls("hz:theme", nx); };
@@ -156,10 +157,34 @@
     h += '<div class="card"><h3>مصادر الشروح</h3><p>الدروس الحوزوية: قناة <b>معهد تراث الأنبياء للدراسات الحوزوية</b> على يوتيوب. دروس الفيزياء والفلك: أساتذة وجهات علمية عرب، ويُذكر اسم المقدِّم في كل درس.</p><p class="muted" style="margin:0">التطبيق لا ينتج الشروح ولا يعدّلها، وإنما يرتّبها ويربطها. الحقوق لأصحابها.</p></div>';
     h += '<div class="card" style="margin-top:12px"><h3>نصوص القراءة</h3><p style="margin:0">نصوص الفيزياء والفلك مختصرة من ويكيبيديا العربية بترخيص CC BY-SA 4.0 ومنسوبة لمقالاتها.</p></div>';
     h += '<div class="card" style="margin-top:12px"><h3>تنبيه</h3><p style="margin:0">لا يقدّم التطبيق فتاوى. وتسمية بعض الكتب من سجل المنهج وتحتاج مراجعة أستاذ. ترتيب المنهج حسب المعهد وليس منهجًا رسميًا للنجف.</p></div>';
-    if (!isNative) h += '<div class="card" style="margin-top:12px"><h3>تطبيق أندرويد</h3><p>ثبّت التطبيق على هاتفك لتصلك تذكيرات الثامنة صباحًا.</p><a class="btn primary" href="' + APK + '">تحميل التطبيق (APK)</a></div>';
+    if (!isNative) h += '<div class="card" style="margin-top:12px"><h3>تطبيق أندرويد</h3><p>ثبّت التطبيق على هاتفك لتصلك تذكير الثامنة صباحًا (من السبت إلى الأربعاء).</p><a class="btn primary" href="' + APK + '">تحميل التطبيق (APK)</a></div>';
     h += '<div class="card" style="margin-top:12px"><h3>بياناتك</h3><p class="muted">تقدّمك محفوظ على هذا الجهاز فقط.</p><button class="btn" id="reset">امسح تقدّمي</button></div>';
     shell(h, "#/about");
     document.getElementById("reset").onclick = function () { if (confirm("سيُمسح تقدّمك في كل الدروس. متأكد؟")) { setDone({}); ls("hz:last", null); toast("تم المسح."); pageAbout(); } };
+  }
+
+  /* ---------- daily timetable: 8:00-11:00, Saturday to Wednesday (Thursday and Friday off) ---------- */
+  var SLOTS = [["8:00 – 8:35", "nahw"], ["8:40 – 9:10", "sarf"], ["9:15 – 9:50", "mantiq"], ["9:55 – 10:25", "balagha"], ["10:30 – 11:00", "aqaid"]];
+  var WEEK = [[6, "السبت"], [0, "الأحد"], [1, "الاثنين"], [2, "الثلاثاء"], [3, "الأربعاء"], [4, "الخميس"], [5, "الجمعة"]];
+  function nextLesson(s, done) {
+    for (var i = 0; i < s.courses.length; i++) { var c = s.courses[i]; for (var j = 0; j < c.lessons.length; j++) { if (!done[key(s.id, c.id, c.lessons[j].id)]) return { c: c, l: c.lessons[j] }; } }
+    return null;
+  }
+  function pagePlan() {
+    var done = getDone(), today = new Date().getDay(), off = today === 4 || today === 5;
+    var h = '<div class="hero"><h1>الجدول اليومي</h1><p>من الثامنة صباحًا إلى الحادية عشرة، من السبت إلى الأربعاء. الخميس والجمعة عطلة.</p></div>';
+    h += '<div class="days">' + WEEK.map(function (d) { return '<span class="day' + (d[0] === today ? " now" : "") + (d[0] === 4 || d[0] === 5 ? " off" : "") + '">' + d[1] + "</span>"; }).join("") + "</div>";
+    if (off) {
+      h += '<div class="card"><h3>اليوم عطلة</h3><p style="margin:0">استرح، ويمكنك مراجعة ما مضى من قسم الدروس.</p></div>';
+    } else {
+      h += '<div class="card"><h3>درس اليوم</h3><div class="list">' + SLOTS.map(function (sl) {
+        var s = sub(sl[1]), n = nextLesson(s, done);
+        return '<div class="slot"><span class="t">' + sl[0] + '</span><div class="grow"><b>' + esc(s.name) + "</b>" + (n ? '<div class="muted" style="font-size:15px">' + esc(n.l.title) + "</div>" : '<div class="muted">أتممتَ كل دروسها</div>') + "</div>" +
+          (n ? '<a class="btn primary" href="#/l/' + s.id + "|" + n.c.id + "|" + n.l.id + '">ابدأ</a>' : "") + "</div>";
+      }).join("") + "</div></div>";
+    }
+    h += '<div class="note">الدرس التالي لكل مادة هو أول درس لم تُتمّه. إن غبتَ لا يتقدم المؤشر، فتبدأ بالدرس الفائت. الفيزياء والفلك دروس اختيارية في أي وقت من قسم الدروس.</div>';
+    shell(h, "#/plan");
   }
 
   /* ---------- router ---------- */
@@ -167,6 +192,7 @@
     var h = location.hash || "#/", m;
     if ((m = h.match(/^#\/s\/(.+)$/))) return pageSubject(decodeURIComponent(m[1]));
     if ((m = h.match(/^#\/l\/(.+)$/))) return pageLesson(decodeURIComponent(m[1]));
+    if (h === "#/plan") return pagePlan();
     if (h === "#/books") return pageBooks();
     if (h === "#/qibla") return pageQibla();
     if (h === "#/about") return pageAbout();
@@ -178,7 +204,7 @@
     var LN = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; if (!isNative || !LN) return;
     try {
       var p = await LN.requestPermissions(); if (p.display !== "granted") return;
-      var days = [7, 1, 2, 3, 4, 5];
+      var days = [7, 1, 2, 3, 4]; /* Sat..Wed: Thursday and Friday off */
       await LN.cancel({ notifications: days.map(function (d) { return { id: 800 + d }; }) });
       await LN.schedule({ notifications: days.map(function (d) { return { id: 800 + d, title: "حوزتي", body: "حان موعد درس اليوم. افتح التطبيق وتابع من حيث توقفت.", schedule: { on: { weekday: d, hour: 8, minute: 0 }, allowWhileIdle: true } }; }) });
     } catch (e) {}
