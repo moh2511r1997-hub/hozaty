@@ -2,7 +2,7 @@
   "name": "hozaty",
   "version": "2.0.0",
   "private": true,
-  "description": "حوزتي: دروس المقدمات الحوزوية والفيزياء والفلك، كل درس مربوط بشرحه على يوتيوب",
+  "description": "حوزتي للدراسات الحوزوية: دروس المقدمات والسطوح وبحث الخارج",
   "scripts": {
     "data": "node tools/make-data.mjs",
     "serve": "node tools/serve.mjs"
