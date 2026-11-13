@@ -268,6 +268,119 @@
     document.getElementById("preset").onclick = function () { ls("hz:plan", null); schedule(); toast("أُعيد الجدول الافتراضي."); pagePlan(); };
   }
 
+  /* ---------- internal discussion (retrieval from the attached books only, no AI, no network) ---------- */
+  var CH = { sid: null, mode: "ask", idx: {}, msgs: [], current: null, loading: false };
+  var STOP = {};
+  "من في على الى عن ما هو هي هذا هذه ذلك التي الذي ان كان لا لم لن قد كل اي او ثم بين مع هل كيف لماذا ماذا متي اين اذا حتي بعد قبل عند منه فيه عليه له لها لهم وهو وهي وما ولا وان انه انها كما بل لكن ايضا غير ذلك".split(" ").forEach(function (w) { STOP[w] = 1; });
+  function normAr(s) { return String(s).replace(/[ً-ٰٟـ]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/[^ء-ي0-9]+/g, " ").trim(); }
+  function stem(w) {
+    w = w.replace(/^(وال|بال|كال|فال|لل|ال)/, ""); if (w.length > 4) w = w.replace(/^(و|ف)/, "");
+    if (w.length > 4) w = w.replace(/(ها|هم|ات|ون|ين|ان)$/, ""); if (w.length > 3) w = w.replace(/(ه|ي)$/, "");
+    return w;
+  }
+  function toks(s) { return normAr(s).split(" ").filter(function (w) { return w.length > 1 && !STOP[w]; }).map(stem).filter(function (w) { return w.length > 1; }); }
+
+  function buildIndex(data) {
+    var inv = {}, len = [], tot = 0;
+    data.chunks.forEach(function (c, i) {
+      var t = toks(c[2]), tf = {}; t.forEach(function (w) { tf[w] = (tf[w] || 0) + 1; });
+      len[i] = t.length; tot += t.length;
+      Object.keys(tf).forEach(function (w) { (inv[w] = inv[w] || []).push([i, tf[w]]); });
+    });
+    return { data: data, inv: inv, len: len, avg: tot / Math.max(1, data.chunks.length), N: data.chunks.length };
+  }
+  function idf(ix, w) { var n = (ix.inv[w] || []).length; return Math.log(1 + (ix.N - n + 0.5) / (n + 0.5)); }
+  function search(ix, q, k) {
+    var qt = toks(q), sc = {}; if (!qt.length) return [];
+    var seenT = {}; qt.forEach(function (w) {
+      if (seenT[w]) return; seenT[w] = 1; var post = ix.inv[w]; if (!post) return; var id = idf(ix, w);
+      post.forEach(function (p) { var i = p[0], tf = p[1], d = 1.2 * (0.25 + 0.75 * ix.len[i] / ix.avg); sc[i] = (sc[i] || 0) + id * (tf * 2.2) / (tf + d); });
+    });
+    var arr = Object.keys(sc).map(function (i) { return [+i, sc[i]]; }).sort(function (a, b) { return b[1] - a[1]; });
+    var out = [], perBook = {};
+    for (var j = 0; j < arr.length && out.length < k; j++) { var c = ix.data.chunks[arr[j][0]], b = c[0]; if ((perBook[b] || 0) >= 2) continue; perBook[b] = (perBook[b] || 0) + 1; out.push({ i: arr[j][0], score: arr[j][1] }); }
+    return out;
+  }
+  function highlight(text, qt) {
+    var set = {}; qt.forEach(function (w) { set[w] = 1; });
+    return esc(text).replace(/[ء-يً-ٰٟـ]+/g, function (word) { var st = stem(normAr(word)); return set[st] ? "<mark>" + word + "</mark>" : word; });
+  }
+  function loadCorpus(sid) {
+    if (CH.idx[sid]) return Promise.resolve(CH.idx[sid]);
+    return fetch("corpus/" + sid + ".json").then(function (r) { return r.json(); }).then(function (d) { CH.idx[sid] = buildIndex(d); return CH.idx[sid]; });
+  }
+  var CSUBJ = [["nahw", "النحو"], ["sarf", "الصرف"], ["mantiq", "المنطق"], ["balagha", "البلاغة"], ["aqaid", "العقائد"], ["fiqh0", "الفقه"], ["fiqh", "الفقه الاستدلالي"], ["usul", "الأصول"], ["falsafa", "الفلسفة"], ["hadith", "الحديث"]];
+
+  function passageHtml(ix, p, qt) {
+    var c = ix.data.chunks[p.i], b = ix.data.books[c[0]];
+    return '<div class="quote"><div class="qt">' + highlight(c[2], qt) + '</div><div class="qsrc">' + esc(b.title) + " · ص " + c[1] + " (تقريبية)</div></div>";
+  }
+  function addMsg(who, html) { CH.msgs.push({ who: who, html: html }); }
+  function renderChat() {
+    var box = document.getElementById("chatbox"); if (!box) return;
+    box.innerHTML = CH.msgs.map(function (m) { return '<div class="msg ' + m.who + '">' + m.html + "</div>"; }).join("");
+    box.scrollTop = box.scrollHeight;
+  }
+  function clean(ix, text) { var t = toks(text); if (t.length < 12) return 0; var ok = t.filter(function (w) { return (ix.inv[w] || []).length >= 4; }).length; return ok / t.length; }
+  function pickDiscuss(ix) {
+    var best = null, bs = -1;
+    for (var t = 0; t < 120; t++) { var c = ix.data.chunks[Math.floor(Math.random() * ix.N)]; var n = c[2].length; if (n < 320 || n > 760 || /d{3,}/.test(c[2])) continue; var s = clean(ix, c[2]); if (s > bs) { bs = s; best = c; } if (s >= 0.9) break; }
+    return best || ix.data.chunks[Math.floor(Math.random() * ix.N)];
+  }
+  function keyTerms(ix, text) {
+    var seen = {}, arr = []; toks(text).forEach(function (w) { var df = (ix.inv[w] || []).length; if (!seen[w] && w.length > 2 && df >= 4 && df < ix.N * 0.04) { seen[w] = 1; arr.push([w, idf(ix, w)]); } });
+    return arr.sort(function (a, b) { return b[1] - a[1]; }).slice(0, 8).map(function (x) { return x[0]; });
+  }
+  function startDiscuss() {
+    var ix = CH.idx[CH.sid]; if (!ix) return; var c = pickDiscuss(ix), b = ix.data.books[c[0]];
+    CH.current = { text: c[2], terms: keyTerms(ix, c[2]) };
+    addMsg("bot", "لنتباحث في هذا النص من «" + esc(b.title) + "». اقرأه ثم اكتب بأسلوبك: ما الفكرة التي يقررها؟ وما الألفاظ المهمة فيه؟<div class=\"quote\"><div class=\"qt\">" + esc(c[2]) + "</div><div class=\"qsrc\">" + esc(b.title) + " · ص " + c[1] + " (تقريبية)</div></div>");
+  }
+  function evalAnswer(text) {
+    var cur = CH.current, mine = {}; toks(text).forEach(function (w) { mine[w] = 1; });
+    var hit = cur.terms.filter(function (w) { return mine[w]; }), miss = cur.terms.filter(function (w) { return !mine[w]; });
+    var pct = Math.round(hit.length * 100 / cur.terms.length), verdict = pct >= 70 ? "أحسنت، غطّيتَ أغلب مفاتيح النص." : pct >= 40 ? "جيد، لكن بقيت نقاط مهمة." : "راجع النص ثم أعد الكتابة، فقد فاتتك مفاتيح كثيرة.";
+    var html = "<b>" + verdict + "</b><br>تقدير تقريبي بالكلمات المفتاحية: " + hit.length + " من " + cur.terms.length + " (" + pct + "%).";
+    if (hit.length) html += '<div class="muted small">وردت عندك: ' + esc(hit.join("، ")) + "</div>";
+    if (miss.length) html += '<div class="muted small">لم ترد: ' + esc(miss.join("، ")) + "</div>";
+    html += '<div class="row" style="margin-top:8px"><button class="btn primary" id="nextd">نص آخر</button><button class="btn" id="toask">إلى وضع السؤال</button></div><div class="muted small" style="margin-top:6px">هذا مقياس آلي بسيط للكلمات، وليس تقييمًا علميًا. اعرض إجابتك على أستاذك.</div>';
+    return html;
+  }
+  function answerAsk(q) {
+    var ix = CH.idx[CH.sid], qt = toks(q), res = search(ix, q, 3);
+    if (!res.length || res[0].score < 1.2) { addMsg("bot", "لم أجد في الكتب المرفقة لهذه المادة ما يجيب عن سؤالك. جرّب كلمات أخرى أو مادة أخرى."); return; }
+    addMsg("bot", "وجدتُ هذه المقاطع في الكتب المرفقة (نقلٌ حرفي من نص مستخرج آليًا، فقد تظهر فيه أخطاء):" + res.map(function (p) { return passageHtml(ix, p, qt); }).join(""));
+  }
+  function pageChat() {
+    var sid = CH.sid || "nahw";
+    var h = '<div class="hero"><h1>المباحثة</h1><p>ناقش الكتب المرفقة: اسأل فتأتيك مقاطع منها، أو اطلب أن نتباحث في نص ويُقاس فهمك.</p></div>';
+    h += '<div class="chips">' + CSUBJ.map(function (s) { return '<button class="cp" data-sid="' + s[0] + '" aria-pressed="' + (s[0] === sid) + '">' + s[1] + "</button>"; }).join("") + "</div>";
+    h += '<div class="seg" style="margin-top:10px"><button data-m="ask" aria-selected="' + (CH.mode === "ask") + '">اسأل الكتب</button><button data-m="discuss" aria-selected="' + (CH.mode === "discuss") + '">باحثني في نص</button></div>';
+    h += '<div id="chatbox" class="chatbox" aria-live="polite"></div>';
+    h += '<form class="chatform" id="chatform"><input id="chatin" type="text" autocomplete="off" placeholder="' + (CH.mode === "ask" ? "اكتب سؤالك من الكتاب…" : "اكتب شرحك للنص…") + '"><button class="btn primary" type="submit" id="chatsend">إرسال</button></form>';
+    h += '<div class="note">المحتوى كله مقتطف حرفيًا من الكتب المرفقة (' + CSUBJ.length + ' مواد)، بلا توليد ولا اتصال بأي خدمة ذكاء. النص مستخرج آليًا من مسوحات وقد يحوي أخطاء.</div>';
+    shell(h, "#/chat");
+    [].forEach.call(document.querySelectorAll(".cp"), function (b) { b.onclick = function () { CH.sid = b.getAttribute("data-sid"); CH.msgs = []; CH.current = null; pageChat(); }; });
+    [].forEach.call(document.querySelectorAll(".seg [data-m]"), function (b) { b.onclick = function () { CH.mode = b.getAttribute("data-m"); CH.msgs = []; CH.current = null; pageChat(); }; });
+    var ready = function () {
+      if (!CH.msgs.length) { addMsg("bot", CH.mode === "ask" ? "السلام عليكم. اسألني عن أي مسألة في كتب «" + esc((CSUBJ.filter(function (s) { return s[0] === sid; })[0] || [0, ""])[1]) + "» وأنقل لك ما ورد فيها." : "سأعرض عليك نصًا من الكتب، اشرحه لي بأسلوبك ثم أقيس أهم مفاتيحه."); if (CH.mode === "discuss") startDiscuss(); }
+      renderChat(); bindChat();
+    };
+    CH.sid = sid;
+    if (CH.idx[sid]) ready(); else { addMsg("bot", "جارٍ تحميل كتب المادة…"); renderChat(); loadCorpus(sid).then(function () { CH.msgs = []; ready(); }).catch(function () { CH.msgs = []; addMsg("bot", "تعذّر تحميل كتب هذه المادة. تحقق من الاتصال."); renderChat(); }); }
+  }
+  function bindChat() {
+    var f = document.getElementById("chatform"); if (!f) return;
+    f.onsubmit = function (e) {
+      e.preventDefault(); var inp = document.getElementById("chatin"), v = inp.value.trim(); if (!v || !CH.idx[CH.sid]) return; inp.value = "";
+      addMsg("me", esc(v));
+      if (CH.mode === "ask") answerAsk(v);
+      else if (CH.current) { addMsg("bot", evalAnswer(v)); renderChat(); var nx = document.getElementById("nextd"), ta = document.getElementById("toask"); if (nx) nx.onclick = function () { CH.current = null; startDiscuss(); renderChat(); }; if (ta) ta.onclick = function () { CH.mode = "ask"; CH.msgs = []; pageChat(); }; return; }
+      renderChat();
+    };
+  }
+
+
   /* ---------- router ---------- */
   function route() {
     if (!D) return;
